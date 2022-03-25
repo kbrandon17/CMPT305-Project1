@@ -6,7 +6,7 @@ CXX=CC
 CCFLAGS= -g -std=c99 -Wall -Werror
 
 
-all: hw3_solution
+all: project1
 
 # Compile all .c files into .o files
 # % matches all (like * in a command)
@@ -15,9 +15,9 @@ all: hw3_solution
 	$(CC) -c $(CCFLAGS) $<
 
 
-hw3_solution: hw3_solution.o
-	$(CC) -o hw3_solution hw3_solution.o -lm
+project1: project1.o
+	$(CC) -o project1 project1.o -lm
 
 
 clean:
-	rm -f *.o hw3_solution
+	rm -f *.o project1
