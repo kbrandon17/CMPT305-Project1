@@ -18,9 +18,18 @@ struct QueueNode {
     struct QueueNode *next;  // next element in line; NULL if this is the last element
 };
 
-// Suggested queue definition
-// Feel free to use some of the functions you implemented in HW2 to manipulate the queue
-// You can change the queue definition and add/remove member variables to suit your implementation
+// Evaluation queue to track next arrival
+
+struct EvalQueue {
+
+    struct QueueNode* nextHighPri;    // next high priority to arrive
+    struct QueueNode* nextMedPri;    // next medium priority to arrive
+    struct QueueNode* nextLowPri;  // next low priority node to arrive
+
+};
+
+// Priority Queue to track patients after evaluation
+
 struct Queue {
 
     struct QueueNode* head;    // Point to the first node of the element queue
@@ -40,25 +49,14 @@ struct Queue {
 
 
 // ------------Global variables------------------------------------------------------
-// Feel free to add or remove
-static double computed_stats[4];  // Store computed statistics: [E(n), E(r), E(w), p0]
-static double simulated_stats[4]; // Store simulated statistics [n, r, w, sim_p0]
-int departure_count = 0;         // current number of departures from queue
-double current_time = 0.0;          // current time during simulation
-double prevCurrentTime = 0.0;
+
+static double simulated_stats[4];   // Store simulated statistics [n, r, w, sim_p0]
+double current_time = 0.0;          // current time during simulation (minutes past 12AM)
+int departure_count;                // total departures of patients leaving hospital
+double prevCurrentTime = 0.0;       // to store previous current time to help calculate stats
+
 
 //-----------------Queue Functions------------------------------------
-// Feel free to add more functions or redefine the following functions
-
-// The following function initializes all "D" (i.e., total_departure) elements in the queue
-// 1. It uses the seed value to initialize random number generator
-// 2. Generates "D" exponentially distributed inter-arrival times based on lambda
-//    And inserts "D" elements in queue with the correct arrival times
-//    Arrival time for element i is computed based on the arrival time of element i+1 added to element i's generated inter-arrival time
-//    Arrival time for first element is just that element's generated inter-arrival time
-// 3. Generates "D" exponentially distributed service times based on mu
-//    And updates each queue element's service time in order based on generated service times
-// 4. Returns a pointer to the generated queue
 
 struct QueueNode* CreateNode(double Narrival_time, double Nservice_time) {
 
@@ -85,205 +83,237 @@ else{
 }
 }
 
-struct Queue* InitializeQueue(int seed, double lambda, double mu, int total_departures){
-  struct Queue* newQueue = malloc(sizeof *newQueue);
+
+// Initializes the evaluation queue, setting the first arrival of each of the three priorities
+
+struct EvalQueue* InitializeEvalQueue(int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu){
+  struct EvalQueue* newQueue = malloc(sizeof *newQueue);
 
   srand(seed);
-  for (int i = 0; i<total_departures; i++) {
-    double randomArr = ((-1/lambda) * log(1-((double) (rand()+1) / RAND_MAX)));
-    double randomSer = ((-1/mu) * log(1-((double) (rand()+1) / RAND_MAX)));
-    Insert(newQueue, randomArr, randomSer);
-  }
 
-   newQueue->cumulative_number = 0.0;
-   newQueue->cumulative_waiting = 0.0;
-   newQueue->cumulative_response = 0.0;
-   newQueue->cumulative_idle_times = 0.0;
-   newQueue->waiting_count = 0;
-   newQueue->first = NULL;
-   newQueue->last = NULL;
-   newQueue->firstWaiting = NULL;
-   newQueue->totalInSystem = 0;
+    double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double medPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double medPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double lowPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double lowPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+    newQueue->nextHighPri = CreateNode(highPriArr, highPriSer);
+    newQueue->nextMedPri = CreateNode(medPriArr, medPriSer);
+    newQueue->nextLowPri = CreateNode(lowPriArr, lowPriSer);
+
   return newQueue;
 }
 
 
-// Use the M/M/1 formulas from class to compute E(n), E(r), E(w), p0
-void GenerateComputedStatistics(double lambda, double mu){
+// Printing out the report of statistics at every hour
 
-double trafficInt = lambda/mu;
-
-computed_stats[0] = trafficInt/(1 - trafficInt);
-computed_stats[1] = 1/(mu*(1-trafficInt));
-computed_stats[2] = trafficInt/(mu*(1-trafficInt));
-computed_stats[3] = 1 - trafficInt;
-
-}
-
-// This function should be called to print periodic and/or end-of-simulation statistics
-// Do not modify output format
 void PrintStatistics(struct Queue* elementQ, int total_departures, int print_period, double lambda){
 
-  simulated_stats[0] = elementQ->cumulative_number/current_time;
-  simulated_stats[1] = elementQ->cumulative_response/departure_count;
-  simulated_stats[2] = elementQ->cumulative_waiting/departure_count;
-  simulated_stats[3] = (elementQ->cumulative_idle_times)/current_time;
+  // simulated_stats[0] = elementQ->cumulative_number/current_time;
+  // simulated_stats[1] = elementQ->cumulative_response/departure_count;
+  // simulated_stats[2] = elementQ->cumulative_waiting/departure_count;
+  // simulated_stats[3] = (elementQ->cumulative_idle_times)/current_time;
 
-  printf("\n");
-  if(departure_count == total_departures) {
-    printf("End of Simulation - after %d departures\n", departure_count);
-  }
-  else printf("After %d departures\n", departure_count);
+  // printf("\n");
+  // if(departure_count == total_departures) {
+  //   printf("End of Simulation - after %d departures\n", departure_count);
+  // }
+  // else printf("After %d departures\n", departure_count);
 
-  printf("Mean n = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[0], computed_stats[0]);
-  printf("Mean r = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[1], computed_stats[1]);
-  printf("Mean w = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[2], computed_stats[2]);
-  printf("p0 = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[3], computed_stats[3]);
+  // printf("Mean n = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[0], computed_stats[0]);
+  // printf("Mean r = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[1], computed_stats[1]);
+  // printf("Mean w = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[2], computed_stats[2]);
+  // printf("p0 = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[3], computed_stats[3]);
 
 }
 
+// Function to process the arrival of a patient to the hospital.
 
+void ProcessEvalArrival(struct EvalQueue* elementQ, struct QueueNode* arrival){
 
-// This function is called from simulator if next event is "start_service"
-//  Should update queue statistics
-void StartService(struct Queue* elementQ)
+prevCurrentTime = current_time;
+current_time = arrival->arrival_time;
+
+//next to arrive is high priority
+if(arrival = elementQ->nextHighPri)
 {
-  (elementQ->firstWaiting)->waiting_time = current_time-((elementQ->firstWaiting)->arrival_time);
-  elementQ->cumulative_waiting += (elementQ->firstWaiting)->waiting_time;
-  elementQ->first = elementQ->firstWaiting;
+  current_time = (elementQ->nextHighPri)->arrival_time;
+}
+//next to arrive is medium priority
+else if(arrival = elementQ->nextMedPri)
+{
+  current_time = (elementQ->nextMedPri)->arrival_time;
+}
+//next to arrive is low priority
+else if(arrival = elementQ->nextLowPri)
+{
+  current_time = (elementQ->nextLowPri)->arrival_time;
+}
 
-  if(((elementQ->firstWaiting)->next != NULL) && 
-      ((elementQ->firstWaiting)->next)->arrival_time < current_time) {
-      elementQ->firstWaiting = (elementQ->firstWaiting)->next;
-  }
-  else {
-    elementQ->firstWaiting = NULL;
-  }
-  elementQ->waiting_count--;
+
+}
+
+// Function to start nurse evaluation
+
+void StartEvaluationService(struct Queue* elementQ)
+{
+  // (elementQ->firstWaiting)->waiting_time = current_time-((elementQ->firstWaiting)->arrival_time);
+  // elementQ->cumulative_waiting += (elementQ->firstWaiting)->waiting_time;
+  // elementQ->first = elementQ->firstWaiting;
+
+  // if(((elementQ->firstWaiting)->next != NULL) && 
+  //     ((elementQ->firstWaiting)->next)->arrival_time < current_time) {
+  //     elementQ->firstWaiting = (elementQ->firstWaiting)->next;
+  // }
+  // else {
+  //   elementQ->firstWaiting = NULL;
+  // }
+  // elementQ->waiting_count--;
 
   // printf( "FIRST: %f\n", ((elementQ->first)->arrival_time));
   // printf( "NEXT ARRIVING: %f\n", (((elementQ->last)->next)->arrival_time));
 
 }
 
-// This function is called from simulator if the next event is an arrival
-// Should update simulated statistics based on new arrival
-// Should update current queue nodes and various queue member variables
-// *arrival points to queue node that arrived
-// Returns pointer to node that will arrive next
-void ProcessArrival(struct Queue* elementQ, struct QueueNode* arrival){
+// Called after patient has been helped by nurse and begins waiting in priority queue
 
-prevCurrentTime = current_time;
-current_time = arrival->arrival_time;
+void ProcessPriorityArrival(struct Queue* elementQ, struct QueueNode* arrival){
 
-//printf("node about to arrive: %d\n", elementQ->totalInSystem);
-elementQ->cumulative_number += (current_time - prevCurrentTime)*elementQ->totalInSystem;
-elementQ->totalInSystem++;
+// prevCurrentTime = current_time;
+// current_time = arrival->arrival_time;
+
+// //printf("node about to arrive: %d\n", elementQ->totalInSystem);
+// elementQ->cumulative_number += (current_time - prevCurrentTime)*elementQ->totalInSystem;
+// elementQ->totalInSystem++;
 
 
 
-if(elementQ->first == NULL)
+// if(elementQ->first == NULL)
+// {
+//   elementQ->cumulative_idle_times += current_time-prevCurrentTime;
+//   elementQ->firstWaiting = arrival;
+//   elementQ->last = arrival;
+//   StartService(elementQ);
+// }
+
+// else if(elementQ->firstWaiting == NULL)
+// {
+//   elementQ->firstWaiting = arrival;
+//   elementQ->last = arrival;
+//   elementQ->waiting_count++;
+// }
+// else {
+//   elementQ->last = arrival;
+//   elementQ->waiting_count++;
+// }
+
+}
+
+// Function to put patient from priority queue into a room
+
+void StartEvaluationService(struct Queue* elementQ)
 {
-  elementQ->cumulative_idle_times += current_time-prevCurrentTime;
-  elementQ->firstWaiting = arrival;
-  elementQ->last = arrival;
-  StartService(elementQ);
-}
+  // (elementQ->firstWaiting)->waiting_time = current_time-((elementQ->firstWaiting)->arrival_time);
+  // elementQ->cumulative_waiting += (elementQ->firstWaiting)->waiting_time;
+  // elementQ->first = elementQ->firstWaiting;
 
-else if(elementQ->firstWaiting == NULL)
-{
-  elementQ->firstWaiting = arrival;
-  elementQ->last = arrival;
-  elementQ->waiting_count++;
-}
-else {
-  elementQ->last = arrival;
-  elementQ->waiting_count++;
-}
+  // if(((elementQ->firstWaiting)->next != NULL) && 
+  //     ((elementQ->firstWaiting)->next)->arrival_time < current_time) {
+  //     elementQ->firstWaiting = (elementQ->firstWaiting)->next;
+  // }
+  // else {
+  //   elementQ->firstWaiting = NULL;
+  // }
+  // elementQ->waiting_count--;
 
-
+  // printf( "FIRST: %f\n", ((elementQ->first)->arrival_time));
+  // printf( "NEXT ARRIVING: %f\n", (((elementQ->last)->next)->arrival_time));
 
 }
 
-// This function is called from simulator if the next event is a departure
-// Should update simulated queue statistics
-// Should update current queue nodes and various queue member variables
-void ProcessDeparture(struct Queue* elementQ){
+// Function for when a patient is finished in a room and leaves (adds an event to janitor queue)
 
-prevCurrentTime = current_time;
-current_time = (elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time;
+void ProcessPatientDeparture(struct Queue* elementQ){
 
-//printf("node about to depart: %d\n", elementQ->totalInSystem);
-elementQ->cumulative_number += (current_time - prevCurrentTime)*elementQ->totalInSystem;
+// prevCurrentTime = current_time;
+// current_time = (elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time;
 
-elementQ->totalInSystem--;
+// //printf("node about to depart: %d\n", elementQ->totalInSystem);
+// elementQ->cumulative_number += (current_time - prevCurrentTime)*elementQ->totalInSystem;
 
-elementQ->cumulative_response += (elementQ->first)->service_time + (elementQ->first)->waiting_time;
+// elementQ->totalInSystem--;
 
-if(elementQ->firstWaiting != NULL) {
-    StartService(elementQ);
-  }
-else
-  {
-    elementQ->first = NULL;
-  }
+// elementQ->cumulative_response += (elementQ->first)->service_time + (elementQ->first)->waiting_time;
 
-departure_count++;
+// if(elementQ->firstWaiting != NULL) {
+//     StartService(elementQ);
+//   }
+// else
+//   {
+//     elementQ->first = NULL;
+//   }
+
+// departure_count++;
+}
+
+// Called when a janitor has finished cleaning a room
+
+void JanitorCleanedRoom(struct Queue* elementQ) {
+
 }
 
 // This is the main simulator function
-// Should run until departure_count == total_departures
+// Runs until 24 hours (1440 minutes)
 // Determines what the next event is based on current_time
-// Calls appropriate function based on next event: ProcessArrival(), StartService(), ProcessDeparture()
-// Advances current_time to next event
-// Updates queue statistics if needed
-// Print statistics if departure_count is a multiple of print_period
-// Print statistics at end of simulation (departure_count == total_departure)
+// Print statistics if current time has passed a full hour
+
 void Simulation(struct Queue* elementQ, double lambda, double mu, int print_period, int total_departures)
 {
-  while(departure_count != total_departures)
-  {
-      if((elementQ->first != NULL) && (elementQ->last)->next != NULL
-      && (((elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time)
-            == (((elementQ->last)->next)->arrival_time))) {
-              ProcessDeparture(elementQ);
-              if((elementQ->last)->next != NULL) {
-                ProcessArrival(elementQ, (elementQ->last)->next);
-              }
-                continue;
+  // while(departure_count != total_departures)
+  // {
+  //     if((elementQ->first != NULL) && (elementQ->last)->next != NULL
+  //     && (((elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time)
+  //           == (((elementQ->last)->next)->arrival_time))) {
+  //             ProcessDeparture(elementQ);
+  //             if((elementQ->last)->next != NULL) {
+  //               ProcessArrival(elementQ, (elementQ->last)->next);
+  //             }
+  //               continue;
 
-      }
+  //     }
 
 
 
-      if(elementQ->first != NULL
-        && ((elementQ->last)->next == NULL || (((elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time)
-          <= (((elementQ->last)->next)->arrival_time))))
-      {
+  //     if(elementQ->first != NULL
+  //       && ((elementQ->last)->next == NULL || (((elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time)
+  //         <= (((elementQ->last)->next)->arrival_time))))
+  //     {
 
-        ProcessDeparture(elementQ);
-        if(departure_count%print_period == 0)
-        {
-            PrintStatistics(elementQ, total_departures, print_period, lambda);
-        }
-      }
-      else
-      {
-        if(departure_count == 0 && (elementQ->first == NULL))
-        {
-          //printf("TEST");
-          ProcessArrival(elementQ, elementQ->head);
-        }
-        else
-        {
+  //       ProcessDeparture(elementQ);
+  //       if(departure_count%print_period == 0)
+  //       {
+  //           PrintStatistics(elementQ, total_departures, print_period, lambda);
+  //       }
+  //     }
+  //     else
+  //     {
+  //       if(departure_count == 0 && (elementQ->first == NULL))
+  //       {
+  //         //printf("TEST");
+  //         ProcessArrival(elementQ, elementQ->head);
+  //       }
+  //       else
+  //       {
 
-          ProcessArrival(elementQ, (elementQ->last)->next);
-        }
-      }
-  }
-            PrintStatistics(elementQ, total_departures, print_period, lambda);
+  //         ProcessArrival(elementQ, (elementQ->last)->next);
+  //       }
+  //     }
+  // }
+  //           PrintStatistics(elementQ, total_departures, print_period, lambda);
 }
-// Free memory allocated for queue at the end of simulation
+
+// Free memory allocated for priority queue at the end of simulation
+
 void FreeQueue(struct Queue* elementQ) {
   struct QueueNode* curr;
   while (elementQ->head != NULL) {
@@ -293,6 +323,17 @@ void FreeQueue(struct Queue* elementQ) {
   }
   free(elementQ);
 }
+
+// Free evaluation queue 
+
+void FreeEvalQueue(struct EvalQueue* elementQ) {
+  free(elementQ->nextHighPri);
+  free(elementQ->nextLowPri);
+  free(elementQ->nextMedPri);
+  free(elementQ);
+}
+
+// Function to check if input is a number
 
 bool isNumber(char number[]) {
   if(number[0] == 0) {
@@ -306,6 +347,8 @@ bool isNumber(char number[]) {
   return true;
 }
 
+// Function to check if input is integer
+
 bool isInteger(char number[]) {
   for(int i = 0; i < strlen(number); i++) {
     if(number[i] == '.') {
@@ -314,10 +357,11 @@ bool isInteger(char number[]) {
   }
   return true;
 }
+
 // Program's main function
+
 int main(int argc, char* argv[]){
 
-  printf("%d", argc);
 
 	// input arguments lambda(high pri), lambda(med pri), lambda(low pri), mu(eval), mu(high pri), mu(med pri), mu(low pri), mu(clean), B(max capacity), R(num rooms), 
   // m1(num nurses), m2(num janitors), S(seed)
@@ -352,10 +396,10 @@ int main(int argc, char* argv[]){
 
    // Start Simulation
 		printf("Simulating Major Hospital Emergency Department with high priority lambda = %f, medium priority lambda = %f, low priority lambda = %f, evaluation mu = %f, high priority mu = %f, medium priority mu - %f, low priority mu = %f, clean mu = %f, max capacity = %d, number of rooms = %d, number of nurses = %d, number of janitors = %d, S = %d\n", highPriLambda, medPriLambda, lowPriLambda, evalMu, highPriMu, medPriMu, lowPriMu, cleanMu, maxCapacity, numRooms, numNurses, numJanitors, random_seed);
-	//	struct Queue* elementQ = InitializeQueue(random_seed, lambda, mu, total_departures);
+		struct EvalQueue* elementQ = InitializeEvalQueue(random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu);
 
   //  Simulation(elementQ, lambda, mu, print_period, total_departures);
-  //  FreeQueue(elementQ);
+    FreeEvalQueue(elementQ);
 	}
 	else printf("Insufficient number of arguments provided!\n");
 
