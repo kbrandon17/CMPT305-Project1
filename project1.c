@@ -317,18 +317,20 @@ bool isInteger(char number[]) {
 // Program's main function
 int main(int argc, char* argv[]){
 
+  printf("%d", argc);
+
 	// input arguments lambda(high pri), lambda(med pri), lambda(low pri), mu(eval), mu(high pri), mu(med pri), mu(low pri), mu(clean), B(max capacity), R(num rooms), 
   // m1(num nurses), m2(num janitors), S(seed)
-	if(argc == 13){
+	if(argc == 14){
 
 		double highPriLambda = atof(argv[1]);
 		double medPriLambda = atof(argv[2]);
-		double lowPriLambda = atoi(argv[3]);
-    double evalMu = atoi(argv[4]);
-    double highPriMu = atoi(argv[5]);
-    double medPriMu = atoi(argv[6]);
-    double lowPriMu = atoi(argv[7]);
-    double cleanMu = atoi(argv[8]);
+		double lowPriLambda = atof(argv[3]);
+    double evalMu = atof(argv[4]);
+    double highPriMu = atof(argv[5]);
+    double medPriMu = atof(argv[6]);
+    double lowPriMu = atof(argv[7]);
+    double cleanMu = atof(argv[8]);
 		int maxCapacity = atoi(argv[9]);
     int numRooms = atoi(argv[10]);
     int numNurses = atoi(argv[11]);
