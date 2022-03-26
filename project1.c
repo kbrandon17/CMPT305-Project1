@@ -12,9 +12,10 @@
 
 // Definition of a Queue Node including arrival and service time
 struct QueueNode {
-    double arrival_time;  // customer arrival time, measured from time t=0, inter-arrival times exponential
-    double service_time;  // customer service time (exponential)
-    double waiting_time;  // customer time spent waiting in queue
+    double arrival_time;     // customer arrival time, measured from time t=0, inter-arrival times exponential
+    double service_time;     // customer service time (exponential)
+    double waiting_time;     // customer time spent waiting in queue
+    int priority;            // 1 - low, 2 - med, 3 - high
     struct QueueNode *next;  // next element in line; NULL if this is the last element
 };
 
@@ -28,18 +29,16 @@ struct EvalQueue {
 
 };
 
-// Priority Queue to track patients after evaluation
+// TODO Priority Queue to track patients after evaluation
 
 struct Queue {
 
     struct QueueNode* head;    // Point to the first node of the element queue
     struct QueueNode* tail;    // Point to the tail node of the element queue
-
     struct QueueNode* first;  // Point to the first arrived customer that is waiting for service
     struct QueueNode* firstWaiting; //first node waiting in queue
     struct QueueNode* last;   // Point to the last arrrived customer that is waiting for service
     int waiting_count;     // Current number of customers waiting for service
-
     double cumulative_response;  // Accumulated response time for all effective departures
     double cumulative_waiting;  // Accumulated waiting time for all effective departures
     double cumulative_idle_times;  // Accumulated times when the system is idle, i.e., no customers in the system
@@ -50,9 +49,20 @@ struct Queue {
 
 // ------------Global variables------------------------------------------------------
 
-static double simulated_stats[4];   // Store simulated statistics [n, r, w, sim_p0]
 double current_time = 0.0;          // current time during simulation (minutes past 12AM)
 int departure_count;                // total departures of patients leaving hospital
+double avgInSystem;                 // average number of patients in system
+double avgResponseTimeAll;          // average response time of all patients
+double avgResponseTimeHigh;         // average response time of high priority patients
+double avgResponseTimeMed;          // average response time of medium priority patients
+double avgResponseTimeLow;          // average response time of low priority patients
+double avgEvalWaitingTime;          // average waiting time in evaluation queue
+double avgPriorityWaitingTimeAll;   // average waiting time in priority queue of all patients
+double avgPriorityWaitingTimeHigh;  // average waiting time in priority queue of high priority patients
+double avgPriorityWaitingTimeMed;   // average waiting time in priority queue of medium priority patients
+double avgPriorityWaitingTimeLow;   // average waiting time in priority queue of low priority patients
+double avgCleanUpTime;              // average time to clean up the patient room
+double numberOfTurnedAwayPatients;  // total number of turned away patients due to full capacity
 double prevCurrentTime = 0.0;       // to store previous current time to help calculate stats
 
 
@@ -98,8 +108,11 @@ struct EvalQueue* InitializeEvalQueue(int seed, double highprilambda, double hig
     double lowPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double lowPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
     newQueue->nextHighPri = CreateNode(highPriArr, highPriSer);
+    (newQueue->nextHighPri)->priority = 3;
     newQueue->nextMedPri = CreateNode(medPriArr, medPriSer);
+    (newQueue->nextMedPri)->priority = 2;
     newQueue->nextLowPri = CreateNode(lowPriArr, lowPriSer);
+    (newQueue->nextLowPri)->priority = 1;
 
   return newQueue;
 }
@@ -109,12 +122,6 @@ struct EvalQueue* InitializeEvalQueue(int seed, double highprilambda, double hig
 
 void PrintStatistics(struct Queue* elementQ, int total_departures, int print_period, double lambda){
 
-  // simulated_stats[0] = elementQ->cumulative_number/current_time;
-  // simulated_stats[1] = elementQ->cumulative_response/departure_count;
-  // simulated_stats[2] = elementQ->cumulative_waiting/departure_count;
-  // simulated_stats[3] = (elementQ->cumulative_idle_times)/current_time;
-
-  // printf("\n");
   // if(departure_count == total_departures) {
   //   printf("End of Simulation - after %d departures\n", departure_count);
   // }
