@@ -317,32 +317,43 @@ bool isInteger(char number[]) {
 // Program's main function
 int main(int argc, char* argv[]){
 
-	// input arguments lambda, mu, D1, D, S
-	if(argc >= 6){
+	// input arguments lambda(high pri), lambda(med pri), lambda(low pri), mu(eval), mu(high pri), mu(med pri), mu(low pri), mu(clean), B(max capacity), R(num rooms), 
+  // m1(num nurses), m2(num janitors), S(seed)
+	if(argc == 13){
 
-		double lambda = atof(argv[1]);
-		double mu = atof(argv[2]);
-		int print_period = atoi(argv[3]);
-		int total_departures = atoi(argv[4]);
-		int random_seed = atoi(argv[5]);
+		double highPriLambda = atof(argv[1]);
+		double medPriLambda = atof(argv[2]);
+		double lowPriLambda = atoi(argv[3]);
+    double evalMu = atoi(argv[4]);
+    double highPriMu = atoi(argv[5]);
+    double medPriMu = atoi(argv[6]);
+    double lowPriMu = atoi(argv[7]);
+    double cleanMu = atoi(argv[8]);
+		int maxCapacity = atoi(argv[9]);
+    int numRooms = atoi(argv[10]);
+    int numNurses = atoi(argv[11]);
+    int numJanitors = atoi(argv[12]);
+		int random_seed = atoi(argv[13]);
 
-    if(!isNumber(argv[1]) || !isNumber(argv[2]) || !isNumber(argv[3]) || !isNumber(argv[4]) ||!isNumber(argv[5])) {
-      printf("Provide proper input.\n");
-      exit(0);
+    for(int i = 1; i < 14; i++) {
+      if(!isNumber(argv[i])) {
+        printf("Provide proper input.\n");
+        exit(1);
+      }
     }
-    if(!isInteger(argv[3]) || !isInteger(argv[4]) || !isInteger(argv[5])) {
+    for(int i = 9; i < 14; i++) {
+      if(!isInteger(argv[i])) {
       printf("Please make sure last three arguments are integers!\n");
-      exit(0);
+      exit(1);
+      }
     }
-   // If no input errors, generate M/M/1 computed statistics based on formulas from class
-   	GenerateComputedStatistics(lambda, mu);
 
    // Start Simulation
-		printf("Simulating M/M/1 queue with lambda = %f, mu = %f, D1 = %d, D = %d, S = %d\n", lambda, mu, print_period, total_departures, random_seed);
-		struct Queue* elementQ = InitializeQueue(random_seed, lambda, mu, total_departures);
+		printf("Simulating Major Hospital Emergency Department with high priority lambda = %f, medium priority lambda = %f, low priority lambda = %f, evaluation mu = %f, high priority mu = %f, medium priority mu - %f, low priority mu = %f, clean mu = %f, max capacity = %d, number of rooms = %d, number of nurses = %d, number of janitors = %d, S = %d\n", highPriLambda, medPriLambda, lowPriLambda, evalMu, highPriMu, medPriMu, lowPriMu, cleanMu, maxCapacity, numRooms, numNurses, numJanitors, random_seed);
+	//	struct Queue* elementQ = InitializeQueue(random_seed, lambda, mu, total_departures);
 
-    Simulation(elementQ, lambda, mu, print_period, total_departures);
-    FreeQueue(elementQ);
+  //  Simulation(elementQ, lambda, mu, print_period, total_departures);
+  //  FreeQueue(elementQ);
 	}
 	else printf("Insufficient number of arguments provided!\n");
 
