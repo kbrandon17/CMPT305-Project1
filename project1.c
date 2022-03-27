@@ -26,6 +26,7 @@ struct EvalQueue {
     struct QueueNode* nextHighPri;    // next high priority to arrive
     struct QueueNode* nextMedPri;    // next medium priority to arrive
     struct QueueNode* nextLowPri;  // next low priority node to arrive
+    int totalInSystem;
 
 };
 
@@ -138,33 +139,36 @@ void PrintStatistics(struct Queue* elementQ, int total_departures, int print_per
   printf("Average waiting time for high priority patients: %f\n", avgPriorityWaitingTimeHigh);
   printf("Average waiting time for medium priority patients: %f\n", avgPriorityWaitingTimeMed);
   printf("Average waiting time for low priority patients: %f\n", avgPriorityWaitingTimeLow);
-  printf("Average cleaning time for patient rooms: %f\n", avgCleanUpTime;
+  printf("Average cleaning time for patient rooms: %f\n", avgCleanUpTime);
   printf("Number of turned away patients due to max capacity: %d\n", numberOfTurnedAwayPatients);
 
 }
 
 // Function to process the arrival of a patient to the hospital.
 
-void ProcessEvalArrival(struct EvalQueue* elementQ, struct QueueNode* arrival){
+void ProcessEvalArrival(struct EvalQueue* evalQ, struct QueueNode* arrival){
 
 prevCurrentTime = current_time;
 current_time = arrival->arrival_time;
 
-//next to arrive is high priority
-if(arrival = elementQ->nextHighPri)
-{
-  current_time = (elementQ->nextHighPri)->arrival_time;
-}
-//next to arrive is medium priority
-else if(arrival = elementQ->nextMedPri)
-{
-  current_time = (elementQ->nextMedPri)->arrival_time;
-}
-//next to arrive is low priority
-else if(arrival = elementQ->nextLowPri)
-{
-  current_time = (elementQ->nextLowPri)->arrival_time;
-}
+//@kbrandon17 might not need below depending on sim function
+// //next to arrive is high priority
+// if(arrival = evalQ->nextHighPri)
+// {
+//   current_time = (evalQ->nextHighPri)->arrival_time;
+// }
+// //next to arrive is medium priority
+// else if(arrival = evalQ->nextMedPri)
+// {
+//   current_time = (evalQ->nextMedPri)->arrival_time;
+// }
+// //next to arrive is low priority
+// else if(arrival = evalQ->nextLowPri)
+// {
+//   current_time = (evalQ->nextLowPri)->arrival_time;
+// }
+
+evalQ->totalInSystem++;
 
 
 }
