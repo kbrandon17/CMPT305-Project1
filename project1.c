@@ -62,7 +62,7 @@ double avgPriorityWaitingTimeHigh;  // average waiting time in priority queue of
 double avgPriorityWaitingTimeMed;   // average waiting time in priority queue of medium priority patients
 double avgPriorityWaitingTimeLow;   // average waiting time in priority queue of low priority patients
 double avgCleanUpTime;              // average time to clean up the patient room
-double numberOfTurnedAwayPatients;  // total number of turned away patients due to full capacity
+int numberOfTurnedAwayPatients;  // total number of turned away patients due to full capacity
 double prevCurrentTime = 0.0;       // to store previous current time to help calculate stats
 
 
@@ -122,15 +122,24 @@ struct EvalQueue* InitializeEvalQueue(int seed, double highprilambda, double hig
 
 void PrintStatistics(struct Queue* elementQ, int total_departures, int print_period, double lambda){
 
-  // if(departure_count == total_departures) {
-  //   printf("End of Simulation - after %d departures\n", departure_count);
-  // }
-  // else printf("After %d departures\n", departure_count);
+   if(current_time >= 1440) {
+     printf("End of Simulation - at 12AM the next day:\n", departure_count);
+   }
+   else printf("At %f O'Clock:\n", current_time/60);
 
-  // printf("Mean n = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[0], computed_stats[0]);
-  // printf("Mean r = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[1], computed_stats[1]);
-  // printf("Mean w = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[2], computed_stats[2]);
-  // printf("p0 = %.4f (Simulated) and %.4f (Computed)\n", simulated_stats[3], computed_stats[3]);
+  printf("Total departures: %d\n", departure_count);
+  printf("Average in system: %f\n", avgInSystem);
+  printf("Average response time for all patients: %f\n", avgResponseTimeAll);
+  printf("Average response time for high priority patients: %f\n", avgResponseTimeHigh);
+  printf("Average response time for medium priority patients: %f\n", avgResponseTimeMed);
+  printf("Average response time for low priority patients: %f\n", avgResponseTimeLow);
+  printf("Average Evaluation Waiting Time: %f\n", avgEvalWaitingTime);
+  printf("Average waiting time for all priority patients: %f\n", avgPriorityWaitingTimeAll);
+  printf("Average waiting time for high priority patients: %f\n", avgPriorityWaitingTimeHigh);
+  printf("Average waiting time for medium priority patients: %f\n", avgPriorityWaitingTimeMed);
+  printf("Average waiting time for low priority patients: %f\n", avgPriorityWaitingTimeLow);
+  printf("Average cleaning time for patient rooms: %f\n", avgCleanUpTime;
+  printf("Number of turned away patients due to max capacity: %d\n", numberOfTurnedAwayPatients);
 
 }
 
