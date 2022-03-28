@@ -9,8 +9,8 @@
 #include<string.h>
 #include<ctype.h>
 
-
 // Definition of a Queue Node including arrival and service time
+
 struct QueueNode {
     double eval_arrival_time;     // customer evaluation arrival time
     double eval_service_time;     // customer evaluation service time (exponential)
@@ -18,6 +18,7 @@ struct QueueNode {
     double priority_arrival_time; // customer priority arrival time
     double priority_service_time; // customer priority service time
     double priority_waiting_time; // customer priority waiting time
+    double time_to_clean_room;    // time it takes the janitor to clean their room
     int priority;                 // 1 - low, 2 - med, 3 - high
     struct QueueNode *next;       // next element in line; NULL if this is the last element
 };
@@ -32,7 +33,23 @@ struct EvalQueue {
     int totalInSystem;               // total number of patients in evaluation queue (waiting and being evaluated)
     int availableNurses;             // number of nurses currently available to evaluate
     double cumulative_waiting;       // Accumulated waiting time for all effective departures
-    int waiting_count;              // Current number of customers waiting for service
+    int waiting_count;               // Current number of customers waiting for service
+};
+
+// Event queue to execute simulation in order
+
+struct EventQueue {
+  struct EventQueueNode* head;       // next event to occur that is queied 
+  struct EventQueueNode* tail;       // last event to occur that is queued
+};
+
+// Nodes to be used in event queue tracking when the event will occur and what will happen
+
+struct EventQueueNode {
+  double event_time;                // time that the event will occur
+  int event_type;                   // 1: eval queue arrival 2: eval service start 3: priority queue arrival 4: priority queue service start 5: patient leaves hospital 6: room cleaned
+  struct QueueNode* qnode;
+  struct EventQueueNode *next;
 };
 
 // TODO Priority Queue to track patients after evaluation
@@ -69,7 +86,7 @@ double avgPriorityWaitingTimeHigh;  // average waiting time in priority queue of
 double avgPriorityWaitingTimeMed;   // average waiting time in priority queue of medium priority patients
 double avgPriorityWaitingTimeLow;   // average waiting time in priority queue of low priority patients
 double avgCleanUpTime;              // average time to clean up the patient room
-int numberOfTurnedAwayPatients;  // total number of turned away patients due to full capacity
+int numberOfTurnedAwayPatients;     // total number of turned away patients due to full capacity
 
 
 
@@ -88,21 +105,41 @@ struct QueueNode* CreateNode(double Narrival_time, double Nservice_time, double 
   return newNode;
 }
 
-void Insert (struct Queue *q, double Narrival_time, double Nservice_time, double Neval_time) {
+// Function to insert events into event queue in order
 
-struct QueueNode* n = CreateNode(Narrival_time, Nservice_time, Neval_time);
-
-if(q->head == NULL) {
-  q->head = n;
+void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n) {
+if((q->head)->next != NULL) {
+  struct EventQueueNode* curr = (q->head)->next;
+  struct EventQueueNode* prev = q->head;
+  while (curr != NULL) {
+    if(n->event_time >= prev->event_time && n->event_time <= curr->event_time) {
+        prev->next = n;
+        n->next = curr;
+        return;
+      }
+    curr = curr->next;
+    prev = prev->next;
+    }
+  prev->next = n;
+  n->next = NULL;
   q->tail = n;
+  return;
 }
-else{
-  n->arrival_time = n->arrival_time + (q->tail)->arrival_time;
-  (q->tail)->next = n;
-  q->tail = n;
+else {
+    struct EventQueueNode* curr = q->head;
+    if(n->event_time >= curr->event_time) {
+      curr->next = n;
+      n->next = NULL;
+      q->tail = n;
+      return;
+    }
+    else {
+      n->next = curr;
+      curr->next = n;
+      return;
+    }
+  }
 }
-}
-
 
 // Initializes the evaluation queue, setting the first arrival of each of the three priorities
 
@@ -135,6 +172,71 @@ struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilam
   return newQueue;
 }
 
+
+struct EventQueueNode* CreateEvalArrivalEventNode(struct QueueNode* q) {
+
+  struct EventQueueNode* newNode = malloc(sizeof *newNode);
+  newNode->event_time = q->eval_arrival_time;
+  newNode->event_type = 1;
+  newNode->qnode = q;
+  newNode->next = NULL;
+  return newNode;
+}
+
+
+struct EventQueueNode* CreateEvalServiceEventNode(struct QueueNode* q) {
+
+  struct EventQueueNode* newNode = malloc(sizeof *newNode);
+  newNode->event_time = current_time;
+  newNode->event_type = 2;
+  newNode->qnode = q;
+  newNode->next = NULL;
+  return newNode;
+}
+
+
+struct EventQueueNode* CreatePriorityArrivalEventNode(struct QueueNode* q) {
+
+  struct EventQueueNode* newNode = malloc(sizeof *newNode);
+  newNode->event_time = q->eval_arrival_time + q->eval_service_time + q->eval_waiting_time;
+  newNode->event_type = 3;
+  newNode->qnode = q;
+  newNode->next = NULL;
+  return newNode;
+}
+
+
+struct EventQueueNode* CreatePriorityStartServiceEventNode(struct QueueNode* q) {
+
+  struct EventQueueNode* newNode = malloc(sizeof *newNode);
+  newNode->event_time = current_time;
+  newNode->event_type = 4;
+  newNode->qnode = q;
+  newNode->next = NULL;
+  return newNode;
+}
+
+
+struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q) {
+
+  struct EventQueueNode* newNode = malloc(sizeof *newNode);
+  newNode->event_time = q->priority_arrival_time + q->priority_service_time + q->priority_waiting_time;
+  newNode->event_type = 5;
+  newNode->qnode = q;
+  newNode->next = NULL;
+  return newNode;
+}
+
+
+struct EventQueueNode* CreateJanitorCleanedRoomEventNode(struct QueueNode* q) {
+
+  struct EventQueueNode* newNode = malloc(sizeof *newNode);
+  newNode->event_time = current_time + q->time_to_clean_room;
+  newNode->event_type = 6;
+  newNode->qnode = q;
+  newNode->next = NULL;
+  return newNode;
+}
 
 // Printing out the report of statistics at every hour
 
@@ -179,14 +281,14 @@ if(arrival->priority == 3) {
     evalQ->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
 }
 
-if(arrival->priority == 2) {
+else if(arrival->priority == 2) {
 
     double medPriArr = ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
     evalQ->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
 }
 
-if(arrival->priority == 1) {
+else if(arrival->priority == 1) {
 
     double lowPriArr = ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -257,7 +359,7 @@ evalQ->availableNurses++;
 
 // Function to put patient from priority queue into a room
 
-void StartEvaluationService(struct Queue* elementQ)
+void StartRoomService(struct Queue* elementQ)
 {
   // (elementQ->firstWaiting)->waiting_time = current_time-((elementQ->firstWaiting)->arrival_time);
   // elementQ->cumulative_waiting += (elementQ->firstWaiting)->waiting_time;
@@ -296,6 +398,8 @@ void ProcessPatientDeparture(struct Queue* elementQ){
 //   {
 //     elementQ->first = NULL;
 //   }
+
+//TODO: SET JANITOR CLEAN TIME BEFORE CREATING JANITOR EVENT
 elementQ->totalInSystem--;
 departure_count++;
 }
