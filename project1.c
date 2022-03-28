@@ -141,9 +141,45 @@ else {
   }
 }
 
+void DeleteEventNode(struct EventQueue *q) {
+
+if(q->head == NULL) {
+  return;
+  }
+if(q->head == q->tail) {
+  free(q->head);
+  q->head = NULL;
+  q->tail = NULL;
+  return;
+  }
+if((q->head)->event_type == 2) {
+  struct EventQueueNode* curr = q->head;
+  struct EventQueueNode* after = (q->head)->next;
+  while(after->event_type == 2) {
+    curr=curr->next;
+    after=after->next;
+    }
+  curr->next = after->next;
+  free(after);
+  return;
+  }
+  struct EventQueueNode* newHead = (q->head)->next;
+  free(q->head);
+  q->head = newHead;
+}
+
+void DeleteServiceNode (struct EventQueue *q) {
+  if((q->head)->event_type == 2) {
+    struct EventQueueNode* newHead = (q->head)->next;
+    free(q->head);
+    q->head = newHead;
+  }
+  return;
+}
+
 // Initializes the evaluation queue, setting the first arrival of each of the three priorities
 
-struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
+struct EvalQueue* InitializeEvalQueue(struct EventQueue* eventQ, int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
   struct EvalQueue* newQueue = malloc(sizeof *newQueue);
 
   srand(seed);
@@ -155,15 +191,22 @@ struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilam
     double lowPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double lowPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
-
+//MIGHT NEED TO DO LOOP TO SET EVAL TIME PROPERLY (NOT GIVE ALL THREE SAME)
     newQueue->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
     (newQueue->nextHighPri)->priority = 3;
+    struct EventQueueNode* high = CreateEvalArrivalEventNode(newQueue->nextHighPri);
 
     newQueue->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
     (newQueue->nextMedPri)->priority = 2;
+    struct EventQueueNode* med = CreateEvalArrivalEventNode(newQueue->nextMedPri);
 
     newQueue->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
     (newQueue->nextLowPri)->priority = 1;
+    struct EventQueueNode* low = CreateEvalArrivalEventNode(newQueue->nextLowPri);
+    
+    InsertIntoEventQueueInOrder(eventQ, high);
+    InsertIntoEventQueueInOrder(eventQ, med);
+    InsertIntoEventQueueInOrder(eventQ, low);
 
     newQueue->availableNurses = numNurses;
     newQueue->cumulative_waiting = 0.0;
@@ -172,6 +215,13 @@ struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilam
   return newQueue;
 }
 
+struct EventQueue* InitializeEventQueue(){
+  struct EventQueue* newQueue = malloc(sizeof *newQueue);
+  newQueue->head = NULL;
+  newQueue->tail = NULL;
+
+  return newQueue;
+}
 
 struct EventQueueNode* CreateEvalArrivalEventNode(struct QueueNode* q) {
 
@@ -267,13 +317,14 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
 
 // Function to process the arrival of a patient to the hospital.
 
-void ProcessEvalArrival(struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
+void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
 
 prevCurrentTime = current_time;
 current_time = arrival->eval_arrival_time;
 
     srand(seed);
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
+
 if(arrival->priority == 3) {
 
     double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -298,10 +349,14 @@ else if(arrival->priority == 1) {
 evalQ->totalInSystem++;
 
 if(evalQ->availableNurses > 0) {
-  StartEvaluationService(evalQ, arrival);
+  StartEvaluationService(eventQ, evalQ, arrival);
+  DeleteEventNode(eventQ);
 }
 else {
   evalQ->waiting_count++;
+  struct EventQueueNode* new = CreateEvalServiceEventNode(arrival);
+  InsertIntoEventQueueInOrder(eventQ, new);
+  DeleteEventNode(eventQ);
 }
 
 
@@ -309,17 +364,17 @@ else {
 
 // Function to start nurse evaluation
 
-void StartEvaluationService(struct EvalQueue* evalQ, struct QueueNode* servNode)
+void StartEvaluationService(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* servNode)
 {
   evalQ->availableNurses--;
-  (servNode)->eval_waiting_time = current_time-(servNode->eval_arrival_time);
-   evalQ->cumulative_waiting += (servNode)->eval_waiting_time;
-
-
-
-  // elementQ->waiting_count--;
-
+  servNode->eval_waiting_time = current_time-(servNode->eval_arrival_time);
+  evalQ->cumulative_waiting += (servNode)->eval_waiting_time;
+  struct EventQueueNode* new = CreatePriorityArrivalEventNode(servNode);
+  if(evalQ->waiting_count > 0) {
+      evalQ->waiting_count--;
+  } 
   evalQ->totalInSystem--;
+  InsertIntoEventQueueInOrder(eventQ, new);
 }
 
 // Called after patient has been helped by nurse and begins waiting in priority queue
@@ -361,19 +416,6 @@ evalQ->availableNurses++;
 
 void StartRoomService(struct Queue* elementQ)
 {
-  // (elementQ->firstWaiting)->waiting_time = current_time-((elementQ->firstWaiting)->arrival_time);
-  // elementQ->cumulative_waiting += (elementQ->firstWaiting)->waiting_time;
-  // elementQ->first = elementQ->firstWaiting;
-
-  // if(((elementQ->firstWaiting)->next != NULL) && 
-  //     ((elementQ->firstWaiting)->next)->arrival_time < current_time) {
-  //     elementQ->firstWaiting = (elementQ->firstWaiting)->next;
-  // }
-  // else {
-  //   elementQ->firstWaiting = NULL;
-  // }
-  // elementQ->waiting_count--;
-
 
 }
 
@@ -417,6 +459,9 @@ void JanitorCleanedRoom(struct Queue* elementQ) {
 
 void Simulation(struct Queue* elementQ, double lambda, double mu, int print_period, int total_departures)
 {
+// CHECK IF UNDER MAX CAPACITY AND IF NOT THEN INCREMENT NUM PATIENTS TURNED AWAY
+
+
   // while(departure_count != total_departures)
   // {
   //     if((elementQ->first != NULL) && (elementQ->last)->next != NULL
@@ -544,8 +589,8 @@ int main(int argc, char* argv[]){
 
    // Start Simulation
 		printf("Simulating Major Hospital Emergency Department with high priority lambda = %f, medium priority lambda = %f, low priority lambda = %f, evaluation mu = %f, high priority mu = %f, medium priority mu - %f, low priority mu = %f, clean mu = %f, max capacity = %d, number of rooms = %d, number of nurses = %d, number of janitors = %d, S = %d\n", highPriLambda, medPriLambda, lowPriLambda, evalMu, highPriMu, medPriMu, lowPriMu, cleanMu, maxCapacity, numRooms, numNurses, numJanitors, random_seed);
-		struct EvalQueue* evalQ = InitializeEvalQueue(numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
-
+		struct EventQueue* eventQ = InitializeEventQueue();
+    struct EvalQueue* evalQ = InitializeEvalQueue(eventQ, numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
   //  Simulation(elementQ, lambda, mu, print_period, total_departures);
     FreeEvalQueue(evalQ);
 	}
