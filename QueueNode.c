@@ -1,3 +1,5 @@
+#include "QueueNode.h"
+
 struct QueueNode* CreateNode(double Narrival_time, double Nservice_time, double Neval_time) {
 
   struct QueueNode* newNode = malloc(sizeof(struct QueueNode));

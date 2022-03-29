@@ -1,3 +1,5 @@
+#include "PriorityQueue.h"
+
 //---------------Priority Queue--------------------------
 void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){
   queue->cumulative_number++;

@@ -1,4 +1,14 @@
+#include "EventQueue.h"
+
 // Function to insert events into event queue in order
+
+struct EventQueue* InitializeEventQueue() {
+  struct EventQueue* newQueue = malloc(sizeof *newQueue);
+  newQueue->head = NULL;
+  newQueue->tail = NULL;
+
+  return newQueue;
+}
 
 void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n) {
 if((q->head)->next != NULL) {
@@ -32,6 +42,42 @@ else {
       return;
     }
   }
+}
+
+void DeleteServiceNode (struct EventQueue *q) {
+  if((q->head)->event_type == 2) {
+    struct EventQueueNode* newHead = (q->head)->next;
+    free(q->head);
+    q->head = newHead;
+  }
+  return;
+}
+
+void DeleteEventNode (struct EventQueue *q) {
+
+if(q->head == NULL) {
+  return;
+}
+if(q->head == q->tail) {
+  free(q->head);
+  q->head = NULL;
+  q->tail = NULL;
+  return;
+}
+if((q->head)->event_type == 2) {
+struct EventQueueNode* curr = q->head;
+struct EventQueueNode* after = (q->head)->next;
+while(after->event_type == 2) {
+  curr=curr->next;
+  after=after->next;
+}
+curr->next = after->next;
+free(after);
+return;
+}
+struct EventQueueNode* newHead = (q->head)->next;
+free(q->head);
+q->head = newHead;
 }
 
 struct EventQueueNode* CreateEvalArrivalEventNode(struct QueueNode* q) {

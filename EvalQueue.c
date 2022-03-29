@@ -1,6 +1,9 @@
+#include "EvalQueue.h"
+#include "QueueNode.h"
+
 // Initializes the evaluation queue, setting the first arrival of each of the three priorities
 
-struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
+struct EvalQueue* InitializeEvalQueue(struct EventQueue* eventQ, int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
   struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
 
   srand(seed);
@@ -12,15 +15,22 @@ struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilam
     double lowPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double lowPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
-
+// MIGHT NEED TO LOOP TO DO EVAL SERVICE NUMBER
     newQueue->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
     (newQueue->nextHighPri)->priority = 3;
+    struct EventQueueNode* high = CreateEvalArrivalEventNode(newQueue->nextHighPri);
 
     newQueue->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
     (newQueue->nextMedPri)->priority = 2;
+    struct EventQueueNode* med = CreateEvalArrivalEventNode(newQueue->nextMedPri);
 
     newQueue->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
     (newQueue->nextLowPri)->priority = 1;
+    struct EventQueueNode* low = CreateEvalArrivalEventNode(newQueue->nextLowPri);
+
+    InsertIntoEventQueueInOrder(eventQ, high);
+    InsertIntoEventQueueInOrder(eventQ, med);
+    InsertIntoEventQueueInOrder(eventQ, low);
 
     newQueue->availableNurses = numNurses;
     newQueue->cumulative_waiting = 0.0;
@@ -31,13 +41,14 @@ struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilam
 
 // Function to process the arrival of a patient to the hospital.
 
-void ProcessEvalArrival(struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
+void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
 
 prevCurrentTime = current_time;
 current_time = arrival->eval_arrival_time;
 
     srand(seed);
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
+
 if(arrival->priority == 3) {
 
     double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -62,10 +73,14 @@ else if(arrival->priority == 1) {
 evalQ->totalInSystem++;
 
 if(evalQ->availableNurses > 0) {
-  StartEvaluationService(evalQ, arrival);
+  StartEvaluationService(eventQ, evalQ, arrival);
+  DeleteEventNode(eventQ);
 }
 else {
   evalQ->waiting_count++;
+  struct EventQueueNode* new = CreateEvalServiceEventNode(arrival);
+  InsertIntoEventQueueInOrder(eventQ, new);
+  DeleteEventNode(eventQ);
 }
 
 
@@ -73,17 +88,19 @@ else {
 
 // Function to start nurse evaluation
 
-void StartEvaluationService(struct EvalQueue* evalQ, struct QueueNode* servNode)
+void StartEvaluationService(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* servNode)
 {
   evalQ->availableNurses--;
-  (servNode)->eval_waiting_time = current_time-(servNode->eval_arrival_time);
-   evalQ->cumulative_waiting += (servNode)->eval_waiting_time;
+  servNode->eval_waiting_time = current_time-(servNode->eval_arrival_time);
+  evalQ->cumulative_waiting += servNode->eval_waiting_time;
+  struct EventQueueNode* new = CreatePriorityArrivalEventNode(servNode);
 
-
-
-  // elementQ->waiting_count--;
-
+if(evalQ->waiting_count > 0) {
+  evalQ->waiting_count--;
+}
+  
   evalQ->totalInSystem--;
+  InsertIntoEventQueueInOrder(eventQ, new);
 }
 
 // Free evaluation queue 

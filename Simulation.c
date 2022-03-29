@@ -1,7 +1,4 @@
-
-
-void Simulation(){
-    // ------------Simulation variables------------------------------------------------------
+ // ------------Simulation variables------------------------------------------------------
 
     double current_time = 0.0;          // current time during simulation (minutes past 12AM)
     double prevCurrentTime = 0.0;       // to store previous current time to calculate averages
@@ -18,6 +15,10 @@ void Simulation(){
     double avgPriorityWaitingTimeLow;   // average waiting time in priority queue of low priority patients
     double avgCleanUpTime;              // average time to clean up the patient room
     int numberOfTurnedAwayPatients;     // total number of turned away patients due to full capacity
+
+
+void Simulation(){
+   
 }
 
 // Printing out the report of statistics at every hour
@@ -54,7 +55,10 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
 
 void Simulation(struct Queue* elementQ, double lambda, double mu, int print_period, int total_departures)
 {
-    struct EvalQueue* evalQ = InitializeEvalQueue(numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
+    struct EventQueue* eventQ = InitializeEventQueue();
+    struct EvalQueue* evalQ = InitializeEvalQueue(eventQ, numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
+  //CHECK IF UNDER MAX CAPACITY
+  
   // while(departure_count != total_departures)
   // {
   //     if((elementQ->first != NULL) && (elementQ->last)->next != NULL
