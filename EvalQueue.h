@@ -11,7 +11,7 @@ struct EvalQueue {
     int waiting_count;               // Current number of customers waiting for service
 };
 
-struct EvalQueue* InitializeEvalQueue(int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu);
+struct EvalQueue* InitializeEvalQueue(struct EventQueue* eventQ, int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu);
 void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity);
 void StartEvaluationService(struct EvalQueue* evalQ, struct QueueNode* servNode);
 void FreeEvalQueue(struct EvalQueue* elementQ);
