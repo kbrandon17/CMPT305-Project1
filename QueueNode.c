@@ -1,4 +1,5 @@
 #include "QueueNode.h"
+#include<stdio.h>
 
 struct QueueNode* CreateNode(double Narrival_time, double Nservice_time, double Neval_time) {
 

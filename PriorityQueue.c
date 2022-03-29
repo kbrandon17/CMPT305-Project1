@@ -1,4 +1,7 @@
 #include "PriorityQueue.h"
+#include<stdio.h>
+#include "QueueNode.h"
+#include "EvalQueue.h"
 
 //---------------Priority Queue--------------------------
 void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){

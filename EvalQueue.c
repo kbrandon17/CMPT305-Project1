@@ -1,10 +1,16 @@
 #include "EvalQueue.h"
 #include "QueueNode.h"
+#include "Simulation.c"
+#include<stdio.h>
+#include<math.h>
+#include<stdlib.h>
+
+
 
 // Initializes the evaluation queue, setting the first arrival of each of the three priorities
 
 struct EvalQueue* InitializeEvalQueue(struct EventQueue* eventQ, int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
-  struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
+struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
 
   srand(seed);
 

@@ -1,4 +1,7 @@
 #include "EventQueue.h"
+#include<stdio.h>
+#include "Simulation.c"
+#include "QueueNode.h"
 
 // Function to insert events into event queue in order
 
