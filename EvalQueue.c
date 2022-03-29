@@ -20,17 +20,19 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
     double medPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
     double lowPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double lowPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
-    double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
-// MIGHT NEED TO LOOP TO DO EVAL SERVICE NUMBER
-    newQueue->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
+    double highEvalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double medEvalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
+    double lowEvalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
+
+    newQueue->nextHighPri = CreateNode(highPriArr, highPriSer, highEvalSer);
     (newQueue->nextHighPri)->priority = 3;
     struct EventQueueNode* high = CreateEvalArrivalEventNode(newQueue->nextHighPri);
 
-    newQueue->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
+    newQueue->nextMedPri = CreateNode(medPriArr, medPriSer, medEvalSer);
     (newQueue->nextMedPri)->priority = 2;
     struct EventQueueNode* med = CreateEvalArrivalEventNode(newQueue->nextMedPri);
 
-    newQueue->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
+    newQueue->nextLowPri = CreateNode(lowPriArr, lowPriSer, lowEvalSer);
     (newQueue->nextLowPri)->priority = 1;
     struct EventQueueNode* low = CreateEvalArrivalEventNode(newQueue->nextLowPri);
 
@@ -45,50 +47,83 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
   return newQueue;
 }
 
+void ReplaceWithNextArrival() {
+  
+}
+
 // Function to process the arrival of a patient to the hospital.
 
-void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
+void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity){
 
-prevCurrentTime = current_time;
-current_time = arrival->eval_arrival_time;
+if(totalNumberInSystemNow < maxCapacity) {
+  prevCurrentTime = current_time;
+  current_time = arrival->eval_arrival_time;
+
+      srand(seed);
+      double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
+
+  if(arrival->priority == 3) {
+
+      double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+      evalQ->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
+  }
+
+  else if(arrival->priority == 2) {
+
+      double medPriArr = ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+      evalQ->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
+  }
+
+  else if(arrival->priority == 1) {
+
+      double lowPriArr = ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+      evalQ->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
+  }
+  totalNumberInSystemNow++;
+  evalQ->totalInSystem++;
+
+  if(evalQ->availableNurses > 0) {
+    StartEvaluationService(eventQ, evalQ, arrival);
+    DeleteEventNode(eventQ);
+  }
+  else {
+    evalQ->waiting_count++;
+    struct EventQueueNode* new = CreateEvalServiceEventNode(arrival);
+    InsertIntoEventQueueInOrder(eventQ, new);
+    DeleteEventNode(eventQ);
+  }
+}
+else {
+  numberOfTurnedAwayPatients++;
 
     srand(seed);
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
 
-if(arrival->priority == 3) {
+  if(arrival->priority == 3) {
 
-    double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
-    double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
-    evalQ->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
+      double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+      evalQ->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
+  }
+
+  else if(arrival->priority == 2) {
+
+      double medPriArr = ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+      evalQ->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
+  }
+
+  else if(arrival->priority == 1) {
+
+      double lowPriArr = ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
+      evalQ->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
+  }
+
 }
-
-else if(arrival->priority == 2) {
-
-    double medPriArr = ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
-    double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
-    evalQ->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
-}
-
-else if(arrival->priority == 1) {
-
-    double lowPriArr = ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
-    double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
-    evalQ->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
-}
-
-evalQ->totalInSystem++;
-
-if(evalQ->availableNurses > 0) {
-  StartEvaluationService(eventQ, evalQ, arrival);
-  DeleteEventNode(eventQ);
-}
-else {
-  evalQ->waiting_count++;
-  struct EventQueueNode* new = CreateEvalServiceEventNode(arrival);
-  InsertIntoEventQueueInOrder(eventQ, new);
-  DeleteEventNode(eventQ);
-}
-
 
 }
 

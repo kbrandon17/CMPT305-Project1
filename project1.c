@@ -78,8 +78,8 @@ int main(int argc, char* argv[]){
 
   struct EventQueue* eventQ = InitializeEventQueue();
   struct EvalQueue* evalQ = InitializeEvalQueue(eventQ, numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
-
-  //  Simulation(elementQ, lambda, mu, print_period, total_departures);
+  struct Queue* priorityQ = CreatePriorityQueue();
+    Simulation(random_seed, eventQ, evalQ, priorityQ, numNurses, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, cleanMu, numJanitors, numRooms, maxCapacity);
     FreeEvalQueue(evalQ);
 	}
 	else printf("Insufficient number of arguments provided!\n");

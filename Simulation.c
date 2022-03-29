@@ -1,7 +1,10 @@
+ #include "EvalQueue.h"
+ 
  // ------------Simulation variables------------------------------------------------------
 
     double current_time = 0.0;          // current time during simulation (minutes past 12AM)
     double prevCurrentTime = 0.0;       // to store previous current time to calculate averages
+    int hoursPassed;                    // stores number of hours passed to know whether to print stats
     int departure_count;                // total departures of patients leaving hospital
     double avgInSystem;                 // average number of patients in system
     double avgResponseTimeAll;          // average response time of all patients
@@ -15,7 +18,7 @@
     double avgPriorityWaitingTimeLow;   // average waiting time in priority queue of low priority patients
     double avgCleanUpTime;              // average time to clean up the patient room
     int numberOfTurnedAwayPatients;     // total number of turned away patients due to full capacity
-
+    int totalNumberInSystemNow;         // tracks total number of patients in hospital at given moment
 
 // Printing out the report of statistics at every hour
 
@@ -25,7 +28,6 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
      printf("End of Simulation - at 12AM the next day:\n", departure_count);
    }
    else printf("At %f O'Clock:\n", current_time/60);
-
 
 
   printf("Total departures: %d\n", departure_count);
@@ -49,49 +51,47 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
 // Determines what the next event is based on current_time
 // Print statistics if current time has passed a full hour
 
-void Simulation(struct Queue* elementQ, double lambda, double mu, int print_period, int total_departures)
+void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms, int maxCapacity)
 {
-   //CHECK IF UNDER MAX CAPACITY
-  
-  // while(departure_count != total_departures)
-  // {
-  //     if((elementQ->first != NULL) && (elementQ->last)->next != NULL
-  //     && (((elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time)
-  //           == (((elementQ->last)->next)->arrival_time))) {
-  //             ProcessDeparture(elementQ);
-  //             if((elementQ->last)->next != NULL) {
-  //               ProcessArrival(elementQ, (elementQ->last)->next);
-  //             }
-  //               continue;
-
-  //     }
-
-
-
-  //     if(elementQ->first != NULL
-  //       && ((elementQ->last)->next == NULL || (((elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time)
-  //         <= (((elementQ->last)->next)->arrival_time))))
-  //     {
-
-  //       ProcessDeparture(elementQ);
-  //       if(departure_count%print_period == 0)
-  //       {
-  //           PrintStatistics(elementQ, total_departures, print_period, lambda);
-  //       }
-  //     }
-  //     else
-  //     {
-  //       if(departure_count == 0 && (elementQ->first == NULL))
-  //       {
-  //         //printf("TEST");
-  //         ProcessArrival(elementQ, elementQ->head);
-  //       }
-  //       else
-  //       {
-
-  //         ProcessArrival(elementQ, (elementQ->last)->next);
-  //       }
-  //     }
-  // }
-  //           PrintStatistics(elementQ, total_departures, print_period, lambda);
+  while(current_time < 1440) {
+    if((eventQ->head)->event_type == 1) {
+      ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity);
+    }
+    else if(((eventQ->head)->event_type == 2) || (eventQ->head)->event_type == 4) {
+      struct EventQueueNode* curr = eventQ->head;
+      while(curr != NULL) {
+        if(curr->event_type == 1) {
+          ProcessEvalArrival(eventQ, evalQ, curr->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity);
+          break;
+        }
+        else if(curr->event_type == 3) {
+          ProcessPriorityArrival(evalQ, priorityQ, curr->qnode);
+          break;
+        }
+        else if(curr->event_type == 5) {
+          ProcessPatientDeparture(priorityQ);
+          break;
+        }
+        else if(curr->event_type == 6) {
+          JanitorCleanedRoom(priorityQ);
+          break;
+        }
+        curr = curr->next;
+      }
+    }
+    else if((eventQ->head)->event_type == 3) {
+      ProcessPriorityArrival(evalQ, priorityQ, (eventQ->head)->qnode);
+    }
+    else if((eventQ->head)->event_type == 5) {
+      ProcessPatientDeparture(priorityQ);
+    }
+    else if((eventQ->head)->event_type == 6) {
+      JanitorCleanedRoom(priorityQ);
+    }
+    if(floor(current_time/60) > hoursPassed) {
+      hoursPassed++;
+      PrintStatistics(priorityQ, evalQ);
+    }
+  }
+  PrintStatistics(priorityQ, evalQ);
 }
