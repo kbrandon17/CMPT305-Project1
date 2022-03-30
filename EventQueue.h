@@ -1,3 +1,5 @@
+#include "QueueNode.h"
+
 // Event queue to execute simulation in order
 
 struct EventQueue {
