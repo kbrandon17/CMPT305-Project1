@@ -83,12 +83,14 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
     }
     else if((eventQ->head)->event_type == 3) {
       ProcessPriorityArrival(evalQ, priorityQ, (eventQ->head)->qnode);
+      StartRoomService(eventQ, priorityQ, current_time, highPriMu, medPriMu, lowPriMu);
     }
     else if((eventQ->head)->event_type == 5) {
       ProcessPatientDeparture(priorityQ, eventQ->head->qnode, current_time, cleanMu);
     }
     else if((eventQ->head)->event_type == 6) {
       JanitorCleanedRoom(priorityQ, current_time);
+      StartRoomService(eventQ, priorityQ, current_time, highPriMu, medPriMu, lowPriMu);
     }
     if(floor(current_time/60) > hoursPassed) {
       hoursPassed++;

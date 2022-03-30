@@ -1,5 +1,5 @@
 #include "PriorityQueue.h"
-#include<stdio.h>
+#include <stdio.h>
 #include "QueueNode.h"
 #include "EvalQueue.h"
 #include "EventQueue.h"
@@ -124,6 +124,8 @@ void ProcessPriorityArrival(struct EvalQueue* evalQ, struct Queue* elementQ, str
 
   evalQ->availableNurses++;
   InsertPriorityQueue(queue, arrival);
+  if(elementQ->available_rooms > 0) {
+  }
 }
 
 // Function to put patient from priority queue into a room
@@ -132,6 +134,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 {
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
+    if (patient == NULL) {return;}
     double service_time;
     switch(patient->priority):
       case 1:
