@@ -1,4 +1,7 @@
+#ifndef QUEUENODE
 #include "QueueNode.h"
+#define QUEUENODE
+#endif
 
 // Event queue to execute simulation in order
 
@@ -16,6 +19,7 @@ struct EventQueueNode {
   struct EventQueueNode *next;
 };
 
+struct EventQueue* InitializeEventQueue();
 void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n);
 struct EventQueueNode* CreateEvalArrivalEventNode(struct QueueNode* q);
 struct EventQueueNode* CreateEvalServiceEventNode(struct QueueNode* q);
@@ -23,3 +27,4 @@ struct EventQueueNode* CreatePriorityArrivalEventNode(struct QueueNode* q);
 struct EventQueueNode* CreatePriorityStartServiceEventNode(struct QueueNode* q);
 struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q);
 struct EventQueueNode* CreateJanitorCleanedRoomEventNode(struct QueueNode* q);
+void DeleteEventNode (struct EventQueue *);

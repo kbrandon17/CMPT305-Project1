@@ -1,3 +1,11 @@
+#ifndef QUEUENODE
+#include "QueueNode.h"
+#define QUEUENODE
+#endif
+#ifndef EVENTQUEUE
+#include "EventQueue.h"
+#define EVENTQUEUE
+#endif
 // Evaluation queue to track next arrival
 
 

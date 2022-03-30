@@ -1,7 +1,23 @@
+#ifndef EVENTQUEUE
 #include "EventQueue.h"
-#include<stdio.h>
+#define EVENTQUEUE
+#endif
+#ifndef SIMULATION
 #include "Simulation.h"
+#define SIMULATION
+#endif
+#ifndef QUEUENODE
 #include "QueueNode.h"
+#define QUEUENODE
+#endif
+#ifndef STDIO
+#include <stdio.h>
+#define STDIO
+#endif
+#ifndef STDLIB
+#include <stdlib.h>
+#define STDLIB
+#endif
 
 // Function to insert events into event queue in order
 
@@ -58,29 +74,29 @@ void DeleteServiceNode (struct EventQueue *q) {
 
 void DeleteEventNode (struct EventQueue *q) {
 
-if(q->head == NULL) {
+  if(q->head == NULL) {
+    return;
+  }
+  if(q->head == q->tail) {
+    free(q->head);
+    q->head = NULL;
+    q->tail = NULL;
+    return;
+  }
+  if((q->head)->event_type == 2) {
+  struct EventQueueNode* curr = q->head;
+  struct EventQueueNode* after = (q->head)->next;
+  while(after->event_type == 2) {
+    curr=curr->next;
+    after=after->next;
+  }
+  curr->next = after->next;
+  free(after);
   return;
-}
-if(q->head == q->tail) {
+  }
+  struct EventQueueNode* newHead = (q->head)->next;
   free(q->head);
-  q->head = NULL;
-  q->tail = NULL;
-  return;
-}
-if((q->head)->event_type == 2) {
-struct EventQueueNode* curr = q->head;
-struct EventQueueNode* after = (q->head)->next;
-while(after->event_type == 2) {
-  curr=curr->next;
-  after=after->next;
-}
-curr->next = after->next;
-free(after);
-return;
-}
-struct EventQueueNode* newHead = (q->head)->next;
-free(q->head);
-q->head = newHead;
+  q->head = newHead;
 }
 
 struct EventQueueNode* CreateEvalArrivalEventNode(struct QueueNode* q) {

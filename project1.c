@@ -1,3 +1,15 @@
+//#ifndef EVENTQUEUE
+#include "EventQueue.h"
+#define EVENTQUEUE
+//#endif
+//#ifndef PRIORITYQUEUE
+#include "PriorityQueue.h"
+#define PRIORITYQUEUE
+//#endif
+//#ifndef SIMULATION
+#include "Simulation.h"
+#define SIMULATION
+//#endif
 #include<stdio.h>
 #include<time.h>
 #include<math.h>
@@ -8,8 +20,9 @@
 #include<stdbool.h>
 #include<string.h>
 #include<ctype.h>
-#include "EventQueue.c"
-#include "PriorityQueue.h"
+#include <stddef.h>
+#include <stdbool.h>
+
 
 
 // Function to check if input is a number
@@ -78,9 +91,9 @@ int main(int argc, char* argv[]){
    // Start Simulation
 		printf("Simulating Major Hospital Emergency Department with high priority lambda = %f, medium priority lambda = %f, low priority lambda = %f, evaluation mu = %f, high priority mu = %f, medium priority mu - %f, low priority mu = %f, clean mu = %f, max capacity = %d, number of rooms = %d, number of nurses = %d, number of janitors = %d, S = %d\n", highPriLambda, medPriLambda, lowPriLambda, evalMu, highPriMu, medPriMu, lowPriMu, cleanMu, maxCapacity, numRooms, numNurses, numJanitors, random_seed);
 
-  struct EventQueue* eventQ = InitializeEventQueue();
-  struct EvalQueue* evalQ = InitializeEvalQueue(eventQ, numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
-  struct Queue* priorityQ = CreatePriorityQueue(numRooms, numJanitors);
+    struct EventQueue* eventQ = InitializeEventQueue();
+    struct EvalQueue* evalQ = InitializeEvalQueue(eventQ, numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
+    struct Queue* priorityQ = CreatePriorityQueue(numRooms, numJanitors);
     Simulation(random_seed, eventQ, evalQ, priorityQ, numNurses, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, cleanMu, numJanitors, numRooms, maxCapacity);
     FreeEvalQueue(evalQ);
 	}
@@ -88,4 +101,3 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
-s

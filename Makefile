@@ -11,12 +11,12 @@ all: project1
 # Compile all .c files into .o files
 # % matches all (like * in a command)
 # $< is the source file (.c file)
-%.o : %.c
+%.o : %.c %.h
 	$(CC) -c $(CCFLAGS) $<
 
 
-project1: project1.o
-	$(CC) -o project1 project1.o -lm
+project1: QueueNode.o PriorityQueue.o EvalQueue.o EventQueue.o Simulation.o project1.o
+	$(CC) -o project1 QueueNode.o PriorityQueue.o EvalQueue.o EventQueue.o Simulation.o project1.o -lm
 
 
 clean:

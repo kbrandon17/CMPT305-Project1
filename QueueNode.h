@@ -11,4 +11,5 @@ struct QueueNode {
     int priority;                 // 1 - low, 2 - med, 3 - high
     struct QueueNode *next;       // next element in line; NULL if this is the last element
 };
+
 struct QueueNode* CreateNode(double Narrival_time, double Nservice_time, double Neval_time);

@@ -1,6 +1,31 @@
+ #ifndef SIMULATION
+ #include "Simulation.h"
+ #define SIMULATION
+ #endif
+ #ifndef EVALQUEUE
  #include "EvalQueue.h"
+ #define EVALQUEUE
+ #endif
+ #ifndef EVENTQUEUE
  #include "EventQueue.h"
+ #define EVENTQUEUE
+ #endif
+ #ifndef STDLIB
  #include <stdlib.h>
+ #define STDLIB
+ #endif
+ #ifndef STDDEF
+ #include <stddef.h>
+ #define STDDEF
+ #endif
+ #ifndef MATH
+ #include <math.h>
+ #define MATH
+ #endif
+ #ifndef STDIO
+ #include <stdio.h>
+ #define STDIO
+ #endif
  
  // ------------Simulation variables------------------------------------------------------
 
@@ -27,7 +52,7 @@
 void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
 
    if(current_time >= 1440) {
-     printf("End of Simulation - at 12AM the next day:\n", departure_count);
+     printf("End of Simulation - at 12AM the next day:\n");
    }
    else printf("At %f O'Clock:\n", current_time/60);
 
@@ -71,11 +96,11 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
           break;
         }
         else if(curr->event_type == 5) {
-          ProcessPatientDeparture(priorityQ);
+          ProcessPatientDeparture(eventQ, priorityQ, curr->qnode, cleanMu);
           break;
         }
         else if(curr->event_type == 6) {
-          JanitorCleanedRoom(eventQ, priorityQ, current_time);
+          JanitorCleanedRoom(eventQ, priorityQ);
           break;
         }
         curr = curr->next;
@@ -83,14 +108,14 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
     }
     else if((eventQ->head)->event_type == 3) {
       ProcessPriorityArrival(evalQ, priorityQ, (eventQ->head)->qnode);
-      StartRoomService(eventQ, priorityQ, current_time, highPriMu, medPriMu, lowPriMu);
+      StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
     else if((eventQ->head)->event_type == 5) {
-      ProcessPatientDeparture(priorityQ, (eventQ->head)->qnode, current_time, cleanMu);
+      ProcessPatientDeparture(eventQ, priorityQ, (eventQ->head)->qnode, cleanMu);
     }
     else if((eventQ->head)->event_type == 6) {
-      JanitorCleanedRoom(priorityQ, current_time);
-      StartRoomService(eventQ, priorityQ, current_time, highPriMu, medPriMu, lowPriMu);
+      JanitorCleanedRoom(eventQ, priorityQ);
+      StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
     if(floor(current_time/60) > hoursPassed) {
       hoursPassed++;

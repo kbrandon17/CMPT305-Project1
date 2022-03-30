@@ -1,9 +1,32 @@
+
+#ifndef EVALQUEUE
 #include "EvalQueue.h"
+#define EVALQUEUE
+#endif
+#ifndef QUEUENODE
 #include "QueueNode.h"
+#define QUEUENODE
+#endif
+#ifndef SIMULATION
 #include "Simulation.h"
+#define SIMULATION
+#endif
+#ifndef EVENTQUEUE
+#include "EventQueue.h"
+#define EVENTQUEUE
+#endif
+#ifndef STDIO
 #include <stdio.h>
+#define STDIO
+#endif
+#ifndef MATH
 #include <math.h>
+#define MATH
+#endif
+#ifndef STDLIB
 #include <stdlib.h>
+#define STDLIB
+#endif
 
 
 

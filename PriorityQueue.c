@@ -1,10 +1,35 @@
+#ifndef PRIORITYQUEUE
 #include "PriorityQueue.h"
-#include <stdio.h>
+#define PRIORITYQUEUE
+#endif
+#ifndef QUEUENODE
 #include "QueueNode.h"
+#define QUEUENODE
+#endif
+#ifndef EVALQUEUE
 #include "EvalQueue.h"
+#define EVALQUEUE
+#endif
+#ifndef EVENTQUEUE
 #include "EventQueue.h"
-#include<math.h>
-#include<stdlib.h>
+#define EVENTQUEUE
+#endif
+#ifndef MATH
+#include <math.h>
+#define MATH
+#endif
+#ifndef STDLIB
+#include <stdlib.h>
+#define STDLIB
+#endif
+#ifndef STDIO
+#include <stdio.h>
+#define STDIO
+#endif
+#ifndef STDDEF
+#include <stddef.h>
+#define STDDEF
+#endif
 
 //--------------Janitor Subqueue Stuff--------------------
 void InsertJanitorQueue(struct Queue* queue,struct QueueNode* room){

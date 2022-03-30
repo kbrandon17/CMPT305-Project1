@@ -1,3 +1,16 @@
+#ifndef QUEUENODE
+#include "QueueNode.h"
+#define QUEUENODE
+#endif
+#ifndef EVALQUEUE
+#include "EvalQueue.h"
+#define EVALQUEUE
+#endif
+#ifndef EVENTQUEUE
+#include "EventQueue.h"
+#define EVENTQUEUE
+#endif
+
 
 // Priority Queue to track patients after evaluation
 
