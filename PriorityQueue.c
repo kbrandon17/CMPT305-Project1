@@ -3,6 +3,8 @@
 #include "QueueNode.h"
 #include "EvalQueue.h"
 #include "EventQueue.h"
+#include<math.h>
+#include<stdlib.h>
 
 //--------------Janitor Subqueue Stuff--------------------
 void InsertJanitorQueue(struct Queue* queue,struct QueueNode* room){
@@ -136,7 +138,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
     struct QueueNode* patient = PopPriorityQueue(elementQ);
     if (patient == NULL) {return;}
     double service_time;
-    switch(patient->priority):
+    switch(patient->priority){
       case 1:
          service_time = ((-1/lowPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
       
@@ -145,24 +147,12 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 
       case 3:
         service_time = ((-1/highPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
+    }
     patient->priority_service_time = service_time;
     struct EventQueueNode* event = CreateExitHospitalEventNode(patient, current_time);
     InsertIntoEventQueueInOrder(eventQ, event);
 
   }
-  // (elementQ->firstWaiting)->waiting_time = current_time-((elementQ->firstWaiting)->arrival_time);
-  // elementQ->cumulative_waiting += (elementQ->firstWaiting)->waiting_time;
-  // elementQ->first = elementQ->firstWaiting;
-
-  // if(((elementQ->firstWaiting)->next != NULL) && 
-  //     ((elementQ->firstWaiting)->next)->arrival_time < current_time) {
-  //     elementQ->firstWaiting = (elementQ->firstWaiting)->next;
-  // }
-  // else {
-  //   elementQ->firstWaiting = NULL;
-  // }
-  // elementQ->waiting_count--;
-
 
 }
 
@@ -178,34 +168,12 @@ void ProcessPatientDeparture(struct Queue* elementQ, struct QueueNode* room, dou
     InsertJanitorQueue(room);
   }
 
-
-// prevCurrentTime = current_time;
-// current_time = (elementQ->first)->arrival_time + (elementQ->first)->service_time + (elementQ->first)->waiting_time;
-
-// //printf("node about to depart: %d\n", elementQ->totalInSystem);
-// elementQ->cumulative_number += (current_time - prevCurrentTime)*elementQ->totalInSystem;
-
-// elementQ->totalInSystem--;
-
-// elementQ->cumulative_response += (elementQ->first)->service_time + (elementQ->first)->waiting_time;
-
-// if(elementQ->firstWaiting != NULL) {
-//     StartService(elementQ);
-//   }
-// else
-//   {
-//     elementQ->first = NULL;
-//   }
-
-
-//TODO: SET JANITOR CLEAN TIME BEFORE CREATING JANITOR EVENT
   elementQ->totalInSystem--;
-  departure_count++;
 }
 
 // Called when a janitor has finished cleaning a room
 
-void JanitorCleanedRoom(struct Queue* elementQ, double current_time) {
+void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, double current_time) {
   elementQ->available_rooms++;
   elementQ->janitors++;
   if (elementQ->janitorQueueHead != NULL) {
