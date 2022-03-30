@@ -52,23 +52,23 @@
 void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
 
    if(current_time >= 1440) {
-     printf("End of Simulation - at 12AM the next day:\n");
+     printf("\nEnd of Simulation - at 12AM the next day:\n");
    }
-   else printf("At %f O'Clock:\n", floor(current_time/60));
+   else printf("\nAt %f O'Clock:\n", floor(current_time/60));
 
 
   printf("Total departures: %d\n", departure_count);
-  printf("Average in system: %f\n", avgInSystem);
-  printf("Average response time for all patients: %f\n", avgResponseTimeAll);
-  printf("Average response time for high priority patients: %f\n", avgResponseTimeHigh);
-  printf("Average response time for medium priority patients: %f\n", avgResponseTimeMed);
-  printf("Average response time for low priority patients: %f\n", avgResponseTimeLow);
-  printf("Average Evaluation Waiting Time: %f\n", avgEvalWaitingTime);
-  printf("Average waiting time for all priority patients: %f\n", avgPriorityWaitingTimeAll);
-  printf("Average waiting time for high priority patients: %f\n", avgPriorityWaitingTimeHigh);
-  printf("Average waiting time for medium priority patients: %f\n", avgPriorityWaitingTimeMed);
-  printf("Average waiting time for low priority patients: %f\n", avgPriorityWaitingTimeLow);
-  printf("Average cleaning time for patient rooms: %f\n", avgCleanUpTime);
+  printf("Average in system: %.2f\n", avgInSystem);
+  printf("Average response time for all patients: %.2f\n", avgResponseTimeAll);
+  printf("Average response time for high priority patients: %.2f\n", avgResponseTimeHigh);
+  printf("Average response time for medium priority patients: %.2f\n", avgResponseTimeMed);
+  printf("Average response time for low priority patients: %.2f\n", avgResponseTimeLow);
+  printf("Average Evaluation Waiting Time: %.2f\n", avgEvalWaitingTime);
+  printf("Average waiting time for all priority patients: %.2f\n", avgPriorityWaitingTimeAll);
+  printf("Average waiting time for high priority patients: %.2f\n", avgPriorityWaitingTimeHigh);
+  printf("Average waiting time for medium priority patients: %.2f\n", avgPriorityWaitingTimeMed);
+  printf("Average waiting time for low priority patients: %.2f\n", avgPriorityWaitingTimeLow);
+  printf("Average cleaning time for patient rooms: %.2f\n", avgCleanUpTime);
   printf("Number of turned away patients due to max capacity: %d\n", numberOfTurnedAwayPatients);
 
 }
@@ -92,9 +92,9 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
           break;
         }
         else if(curr->event_type == 3) {
-          ProcessPriorityArrival(evalQ, priorityQ, curr->qnode);
-          DeleteEventNode(eventQ);
+          ProcessPriorityArrival(eventQ, evalQ, priorityQ, curr->qnode);
           StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
+          DeleteEventNode(eventQ);
           break;
         }
         else if(curr->event_type == 5) {
@@ -104,15 +104,15 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
         }
         else if(curr->event_type == 6) {
           JanitorCleanedRoom(eventQ, priorityQ);
-          DeleteEventNode(eventQ);
           StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
+          DeleteEventNode(eventQ);
           break;
         }
         curr = curr->next;
       }
     }
     else if((eventQ->head)->event_type == 3) {
-      ProcessPriorityArrival(evalQ, priorityQ, (eventQ->head)->qnode);
+      ProcessPriorityArrival(eventQ, evalQ, priorityQ, (eventQ->head)->qnode);
       DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }

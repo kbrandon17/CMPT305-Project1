@@ -148,7 +148,10 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
 
 // Called after patient has been helped by nurse and begins waiting in priority queue
 
-void ProcessPriorityArrival(struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival){
+void ProcessPriorityArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival){
+  if((eventQ->head)->event_type == 2) {
+    StartEvaluationService(eventQ, evalQ, (eventQ->head)->qnode);
+  }
   arrival->priority_arrival_time = arrival->eval_arrival_time + arrival->eval_waiting_time + arrival->eval_service_time;
   evalQ->availableNurses++;
   InsertPriorityQueue(elementQ, arrival);
@@ -158,7 +161,7 @@ void ProcessPriorityArrival(struct EvalQueue* evalQ, struct Queue* elementQ, str
 
 void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double highPriMu, double medPriMu, double lowPriMu)
 {
-  elementQ->available_rooms--;
+
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
     if (patient == NULL) {return;}
@@ -176,7 +179,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
     patient->priority_service_time = service_time;
     struct EventQueueNode* event = CreateExitHospitalEventNode(patient);
     InsertIntoEventQueueInOrder(eventQ, event);
-
+   elementQ->available_rooms--;
   }
 
 }
