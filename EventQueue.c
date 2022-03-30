@@ -127,10 +127,10 @@ struct EventQueueNode* CreatePriorityStartServiceEventNode(struct QueueNode* q) 
 }
 
 
-struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q, double time) {
+struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q) {
 
   struct EventQueueNode* newNode = malloc(sizeof(struct EventQueueNode));
-  newNode->event_time = time + q->priority_service_time;
+  newNode->event_time = current_time + q->priority_service_time;
   newNode->event_type = 5;
   newNode->qnode = q;
   newNode->next = NULL;
@@ -138,7 +138,7 @@ struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q, double t
 }
 
 
-struct EventQueueNode* CreateJanitorCleanedRoomEventNode(struct QueueNode* q, double current_time) {
+struct EventQueueNode* CreateJanitorCleanedRoomEventNode(struct QueueNode* q) {
 
   struct EventQueueNode* newNode = malloc(sizeof(struct EventQueueNode));
   newNode->event_time = current_time + q->time_to_clean_room;
