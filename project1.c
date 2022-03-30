@@ -78,7 +78,7 @@ int main(int argc, char* argv[]){
 
   struct EventQueue* eventQ = InitializeEventQueue();
   struct EvalQueue* evalQ = InitializeEvalQueue(eventQ, numNurses, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu);
-  struct Queue* priorityQ = CreatePriorityQueue();
+  struct Queue* priorityQ = CreatePriorityQueue(numRooms, numJanitors);
     Simulation(random_seed, eventQ, evalQ, priorityQ, numNurses, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, cleanMu, numJanitors, numRooms, maxCapacity);
     FreeEvalQueue(evalQ);
 	}
@@ -86,3 +86,4 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
+s
