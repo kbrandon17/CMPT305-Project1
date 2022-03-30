@@ -57,7 +57,8 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
     (newQueue->nextLowPri)->priority = 1;
     struct EventQueueNode* low = CreateEvalArrivalEventNode(newQueue->nextLowPri);
 
-    InsertIntoEventQueueInOrder(eventQ, high);
+    eventQ->head = high;
+    eventQ->tail = high;
     InsertIntoEventQueueInOrder(eventQ, med);
     InsertIntoEventQueueInOrder(eventQ, low);
 
@@ -147,6 +148,7 @@ else {
 
 void StartEvaluationService(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* servNode)
 {
+  DeleteServiceNode(eventQ);
   evalQ->availableNurses--;
   servNode->eval_waiting_time = current_time-(servNode->eval_arrival_time);
   evalQ->cumulative_waiting += servNode->eval_waiting_time;

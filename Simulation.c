@@ -93,14 +93,19 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
         }
         else if(curr->event_type == 3) {
           ProcessPriorityArrival(evalQ, priorityQ, curr->qnode);
+          DeleteEventNode(eventQ);
+          StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
           break;
         }
         else if(curr->event_type == 5) {
           ProcessPatientDeparture(eventQ, priorityQ, curr->qnode, cleanMu);
+          DeleteEventNode(eventQ);
           break;
         }
         else if(curr->event_type == 6) {
           JanitorCleanedRoom(eventQ, priorityQ);
+          DeleteEventNode(eventQ);
+          StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
           break;
         }
         curr = curr->next;
@@ -108,13 +113,16 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
     }
     else if((eventQ->head)->event_type == 3) {
       ProcessPriorityArrival(evalQ, priorityQ, (eventQ->head)->qnode);
+      DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
     else if((eventQ->head)->event_type == 5) {
       ProcessPatientDeparture(eventQ, priorityQ, (eventQ->head)->qnode, cleanMu);
+      DeleteEventNode(eventQ);
     }
     else if((eventQ->head)->event_type == 6) {
       JanitorCleanedRoom(eventQ, priorityQ);
+      DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
     if(floor(current_time/60) > hoursPassed) {

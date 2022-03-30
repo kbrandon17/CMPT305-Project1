@@ -11,17 +11,29 @@
 #define SIMULATION
 //#endif
 #include<stdio.h>
+#define STDIO
 #include<time.h>
+#define TIME
 #include<math.h>
+#define MATH
 #include<stdlib.h>
+#define STDLIB
 #include<unistd.h>
+#define UNISTD
 #include<assert.h>
+#define ASSERT
 #include<float.h>
+#define FLOAT
 #include<stdbool.h>
+#define STDBOOL
 #include<string.h>
+#define STRING
 #include<ctype.h>
+#define CTYPE
 #include <stddef.h>
+#define STDDEF
 #include <stdbool.h>
+#define STDBOOL
 
 
 

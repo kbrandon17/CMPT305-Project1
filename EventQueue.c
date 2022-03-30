@@ -30,8 +30,8 @@ struct EventQueue* InitializeEventQueue() {
 }
 
 void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n) {
-if((q->head)->next != NULL) {
-  struct EventQueueNode* curr = (q->head)->next;
+if(q->head->next != NULL) {
+  struct EventQueueNode* curr = q->head->next;
   struct EventQueueNode* prev = q->head;
   while (curr != NULL) {
     if(n->event_time >= prev->event_time && n->event_time <= curr->event_time) {
@@ -57,7 +57,8 @@ else {
     }
     else {
       n->next = curr;
-      curr->next = n;
+      q->head = n;
+      curr->next = NULL;
       return;
     }
   }
@@ -65,7 +66,7 @@ else {
 
 void DeleteServiceNode (struct EventQueue *q) {
   if((q->head)->event_type == 2) {
-    struct EventQueueNode* newHead = (q->head)->next;
+    struct EventQueueNode* newHead = q->head->next;
     free(q->head);
     q->head = newHead;
   }
@@ -85,7 +86,7 @@ void DeleteEventNode (struct EventQueue *q) {
   }
   if((q->head)->event_type == 2) {
   struct EventQueueNode* curr = q->head;
-  struct EventQueueNode* after = (q->head)->next;
+  struct EventQueueNode* after = q->head->next;
   while(after->event_type == 2) {
     curr=curr->next;
     after=after->next;
@@ -94,7 +95,7 @@ void DeleteEventNode (struct EventQueue *q) {
   free(after);
   return;
   }
-  struct EventQueueNode* newHead = (q->head)->next;
+  struct EventQueueNode* newHead = q->head->next;
   free(q->head);
   q->head = newHead;
 }
