@@ -33,7 +33,6 @@ struct QueueNode* PopJanitorQueue(struct Queue* queue){
 
 //---------------Priority Queue--------------------------
 void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){
-  queue->cumulative_number++;
   queue->cumulative_waiting++;
   queuenode->next = NULL;
   switch(queuenode->priority){
@@ -87,7 +86,6 @@ void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){
 
 struct QueueNode* PopPriorityQueue(struct Queue* queue){
   struct QueueNode* pop = queue->head;
-  queue->cumulative_number--;
   if(pop == queue->tail) { //if queue empty after pop/pop is end of low priority queue
     queue->tail = NULL;
     queue->highTail = NULL;
@@ -107,13 +105,12 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
   struct Queue* queue = malloc(sizeof(struct Queue));
   queue->head=NULL;
   queue->tail=NULL;
-  queue->mediumHead=NULL;
-  queue->lowhead=NULL;
+  queue->mediumTail=NULL;
+  queue->highTail=NULL;
   queue->waiting_count=0;
   queue->cumulative_response=0;
   queue->cumulative_waiting=0;
   queue->cumulative_idle_times=0;
-  queue->cumulative_number=0;
   queue->totalInSystem=0;
   queue->available_rooms = available;
   queue->janitors = janitors;
@@ -125,14 +122,14 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
 void ProcessPriorityArrival(struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival){
 
   evalQ->availableNurses++;
-  InsertPriorityQueue(queue, arrival);
+  InsertPriorityQueue(elementQ, arrival);
   if(elementQ->available_rooms > 0) {
   }
 }
 
 // Function to put patient from priority queue into a room
 
-void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double current_time, double highPriMu, double medPriMu, double lowPriMu)
+void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double highPriMu, double medPriMu, double lowPriMu)
 {
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
@@ -149,7 +146,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
         service_time = ((-1/highPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
     }
     patient->priority_service_time = service_time;
-    struct EventQueueNode* event = CreateExitHospitalEventNode(patient, current_time);
+    struct EventQueueNode* event = CreateExitHospitalEventNode(patient);
     InsertIntoEventQueueInOrder(eventQ, event);
 
   }
@@ -158,14 +155,14 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 
 // Function for when a patient is finished in a room and leaves (adds an event to janitor queue)
 
-void ProcessPatientDeparture(struct Queue* elementQ, struct QueueNode* room, double current_time, double cleanMu){
+void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, struct QueueNode* room, double cleanMu){
   room->time_to_clean_room = ((-1/cleanMu) * log(1-((double) (rand()+1) / RAND_MAX)));
   if(elementQ->janitors > 0){
-    struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(room, current_time);
+    struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(room);
     InsertIntoEventQueueInOrder(eventQ, clean_event);
   } else {
     room->next = NULL;
-    InsertJanitorQueue(room);
+    InsertJanitorQueue(elementQ, room);
   }
 
   elementQ->totalInSystem--;
@@ -173,11 +170,11 @@ void ProcessPatientDeparture(struct Queue* elementQ, struct QueueNode* room, dou
 
 // Called when a janitor has finished cleaning a room
 
-void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, double current_time) {
+void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ) {
   elementQ->available_rooms++;
   elementQ->janitors++;
   if (elementQ->janitorQueueHead != NULL) {
-    struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ), current_time);
+    struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ));
     InsertIntoEventQueueInOrder(eventQ, clean_event);
   }
   

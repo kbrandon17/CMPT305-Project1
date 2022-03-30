@@ -26,8 +26,8 @@ void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode);
 struct QueueNode* PopPriorityQueue(struct Queue* queue);
 struct Queue* CreatePriorityQueue(int, int);
 void ProcessPriorityArrival(struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival);
-void StartRoomService(struct EventQueue*, struct Queue* , double);
-void ProcessPatientDeparture(struct Queue* elementQ, double);
-void JanitorCleanedRoom(struct Queue* elementQ, double);
+void StartRoomService(struct EventQueue*, struct Queue*, double, double, double);
+void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, struct QueueNode* room, double cleanMu);
+void JanitorCleanedRoom(struct EventQueue*, struct Queue* elementQ);
 void FreeQueue(struct Queue* elementQ);
 
