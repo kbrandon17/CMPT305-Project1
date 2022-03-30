@@ -12,8 +12,6 @@
 struct EvalQueue* InitializeEvalQueue(struct EventQueue* eventQ, int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
 struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
 
-  srand(seed);
-
     double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
     double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
     double medPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -47,10 +45,6 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
   return newQueue;
 }
 
-void ReplaceWithNextArrival() {
-  
-}
-
 // Function to process the arrival of a patient to the hospital.
 
 void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity){
@@ -59,7 +53,6 @@ if(totalNumberInSystemNow < maxCapacity) {
   prevCurrentTime = current_time;
   current_time = arrival->eval_arrival_time;
 
-      srand(seed);
       double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
 
   if(arrival->priority == 3) {

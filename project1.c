@@ -60,6 +60,8 @@ int main(int argc, char* argv[]){
     int numJanitors = atoi(argv[12]);
 		int random_seed = atoi(argv[13]);
 
+    srand(random_seed);
+
     for(int i = 1; i < 14; i++) {
       if(!isNumber(argv[i])) {
         printf("Provide proper input.\n");
