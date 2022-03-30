@@ -54,7 +54,7 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
    if(current_time >= 1440) {
      printf("End of Simulation - at 12AM the next day:\n");
    }
-   else printf("At %f O'Clock:\n", current_time/60);
+   else printf("At %f O'Clock:\n", floor(current_time/60));
 
 
   printf("Total departures: %d\n", departure_count);

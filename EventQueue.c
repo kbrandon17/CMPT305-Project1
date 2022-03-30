@@ -30,7 +30,7 @@ struct EventQueue* InitializeEventQueue() {
 }
 
 void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n) {
-if(q->head->next != NULL) {
+if((q->head)->next != NULL) {
   struct EventQueueNode* curr = q->head->next;
   struct EventQueueNode* prev = q->head;
   while (curr != NULL) {
@@ -147,7 +147,7 @@ struct EventQueueNode* CreatePriorityStartServiceEventNode(struct QueueNode* q) 
 struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q) {
 
   struct EventQueueNode* newNode = malloc(sizeof(struct EventQueueNode));
-  newNode->event_time = current_time + q->priority_service_time;
+  newNode->event_time = q->priority_arrival_time + q->priority_service_time + q->priority_waiting_time;
   newNode->event_type = 5;
   newNode->qnode = q;
   newNode->next = NULL;

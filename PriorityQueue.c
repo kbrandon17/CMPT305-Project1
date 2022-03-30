@@ -30,6 +30,10 @@
 #include <stddef.h>
 #define STDDEF
 #endif
+#ifndef SIM
+#include "Simulation.h"
+#define SIM
+#endif
 
 //--------------Janitor Subqueue Stuff--------------------
 void InsertJanitorQueue(struct Queue* queue,struct QueueNode* room){
@@ -145,17 +149,16 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
 // Called after patient has been helped by nurse and begins waiting in priority queue
 
 void ProcessPriorityArrival(struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival){
-
+  arrival->priority_arrival_time = arrival->eval_arrival_time + arrival->eval_waiting_time + arrival->eval_service_time;
   evalQ->availableNurses++;
   InsertPriorityQueue(elementQ, arrival);
-  if(elementQ->available_rooms > 0) {
-  }
 }
 
 // Function to put patient from priority queue into a room
 
 void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double highPriMu, double medPriMu, double lowPriMu)
 {
+  elementQ->available_rooms--;
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
     if (patient == NULL) {return;}
@@ -181,7 +184,8 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 // Function for when a patient is finished in a room and leaves (adds an event to janitor queue)
 
 void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, struct QueueNode* room, double cleanMu){
-  room->time_to_clean_room = ((-1/cleanMu) * log(1-((double) (rand()+1) / RAND_MAX)));
+   current_time = room->priority_arrival_time + room->priority_service_time;
+   room->time_to_clean_room = ((-1/cleanMu) * log(1-((double) (rand()+1) / RAND_MAX)));
   if(elementQ->janitors > 0){
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(room);
     InsertIntoEventQueueInOrder(eventQ, clean_event);
