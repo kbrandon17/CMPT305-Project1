@@ -75,7 +75,7 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
           break;
         }
         else if(curr->event_type == 6) {
-          JanitorCleanedRoom(priorityQ);
+          JanitorCleanedRoom(eventQ, priorityQ, current_time);
           break;
         }
         curr = curr->next;
@@ -86,7 +86,7 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
       StartRoomService(eventQ, priorityQ, current_time, highPriMu, medPriMu, lowPriMu);
     }
     else if((eventQ->head)->event_type == 5) {
-      ProcessPatientDeparture(priorityQ, eventQ->head->qnode, current_time, cleanMu);
+      ProcessPatientDeparture(priorityQ, (eventQ->head)->qnode, current_time, cleanMu);
     }
     else if((eventQ->head)->event_type == 6) {
       JanitorCleanedRoom(priorityQ, current_time);

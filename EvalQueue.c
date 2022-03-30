@@ -1,9 +1,9 @@
 #include "EvalQueue.h"
 #include "QueueNode.h"
-#include "Simulation.c"
-#include<stdio.h>
-#include<math.h>
-#include<stdlib.h>
+#include "Simulation.h"
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 
 
 

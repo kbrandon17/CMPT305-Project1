@@ -1,3 +1,21 @@
 void Simulation();
 void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ);
 void Simulation(struct Queue* elementQ, double lambda, double mu, int print_period, int total_departures);
+
+    extern double current_time;         
+    extern double prevCurrentTime;       
+    extern int hoursPassed;                   
+    extern int departure_count;               
+    extern double avgInSystem;                
+    extern double avgResponseTimeAll;         
+    extern double avgResponseTimeHigh;        
+    extern double avgResponseTimeMed;         
+    extern double avgResponseTimeLow;          
+    extern double avgEvalWaitingTime;          
+    extern double avgPriorityWaitingTimeAll;   
+    extern double avgPriorityWaitingTimeHigh;  
+    extern double avgPriorityWaitingTimeMed;   
+    extern double avgPriorityWaitingTimeLow;   
+    extern double avgCleanUpTime;              
+    extern int numberOfTurnedAwayPatients;     
+    extern int totalNumberInSystemNow;         
