@@ -29,3 +29,4 @@ struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q);
 struct EventQueueNode* CreateJanitorCleanedRoomEventNode(struct QueueNode* q);
 void DeleteEventNode (struct EventQueue *);
 void DeleteServiceNode (struct EventQueue *);
+void FreeEventQueue(struct EventQueue* elementQ);

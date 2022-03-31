@@ -164,3 +164,13 @@ struct EventQueueNode* CreateJanitorCleanedRoomEventNode(struct QueueNode* q) {
   newNode->next = NULL;
   return newNode;
 }
+
+void FreeEventQueue(struct EventQueue* elementQ) {
+  struct EventQueueNode* curr;
+  while (elementQ->head != NULL) {
+    curr = elementQ->head;
+    elementQ->head = (elementQ->head)->next;
+    free(curr);
+  }
+  free(elementQ);
+}
