@@ -194,6 +194,9 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
     if (patient == NULL) {return;}
+    if((current_time + patient->priority_service_time) > 873.00 && (current_time + patient->priority_service_time) <874 ){
+      printf(" ");
+    }
     SetPriorityWait(patient);
     /*double service_time;
     switch(patient->priority){
@@ -218,7 +221,6 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 // Function for when a patient is finished in a room and leaves (adds an event to janitor queue)
 
 void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, struct QueueNode* room, double cleanMu){
-   current_time = room->priority_arrival_time + room->priority_service_time;
    room->priority_departure_time = current_time;
    room->time_to_clean_room = ((-1/cleanMu) * log(1-((double) (rand()+1) / RAND_MAX)));
   if(elementQ->janitors > 0){
@@ -253,7 +255,6 @@ void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, 
 // Called when a janitor has finished cleaning a room
 
 void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, struct EventQueueNode* event) {
-  current_time = event->event_time;
   elementQ->available_rooms++;
   elementQ->janitors++;
   avgCleanUpTime += current_time - event->qnode->priority_departure_time;

@@ -209,7 +209,6 @@ void StartEvaluationService(struct EventQueue* eventQ, struct EvalQueue* evalQ, 
   servNode->eval_waiting_time = current_time-(servNode->eval_arrival_time);
   avgEvalWaitingTime += servNode->eval_waiting_time;
   numEval++;
-  evalQ->cumulative_waiting += servNode->eval_waiting_time;
   struct EventQueueNode* new = CreatePriorityArrivalEventNode(servNode);
 
 if(evalQ->waiting_count > 0) {
