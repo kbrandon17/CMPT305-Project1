@@ -102,6 +102,14 @@ void AddAvgInSystem(double lastTime){
   avgInSystem += totalNumberInSystemNow * (current_time - lastTime);
 }
 
+//Printing helper 
+void HourPassedPrint(struct EventQueueNode* next, struct Queue* priorityQ, struct EvalQueue* evalQ) {
+      while(next->event_time > hoursPassed * 60 && hoursPassed*60 <=1440) {
+      PrintStatistics(priorityQ, evalQ, hoursPassed);
+      hoursPassed++;
+    }
+}
+
 // This is the main simulator function
 // Runs until 24 hours (1440 minutes)
 // Determines what the next event is based on current_time
@@ -109,36 +117,42 @@ void AddAvgInSystem(double lastTime){
 
 void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms2, int maxCapacity)
 {
+
   numRooms = numRooms2;
   while(current_time < 1440) {
-      while(eventQ->head->event_time > hoursPassed * 60 && hoursPassed*60 <=1440) {
-      PrintStatistics(priorityQ, evalQ, hoursPassed);
-      hoursPassed++;
-    }
-    current_time = eventQ->head->event_time;
+ 
     if((eventQ->head)->event_type == 1) {
+      HourPassedPrint(eventQ->head, priorityQ, evalQ);
+      current_time = eventQ->head->event_time;
       ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
     }
     else if(((eventQ->head)->event_type == 2) || (eventQ->head)->event_type == 4) {
       struct EventQueueNode* curr = eventQ->head;
       while(curr != NULL) {
-        current_time = curr->event_time;
         if(curr->event_type == 1) {
+          HourPassedPrint(curr, priorityQ, evalQ);
+          current_time = curr->event_time;
           ProcessEvalArrival(eventQ, evalQ, curr->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
           break;
         }
         else if(curr->event_type == 3) {
+          HourPassedPrint(curr, priorityQ, evalQ);
+          current_time = curr->event_time;
           ProcessPriorityArrival(eventQ, evalQ, priorityQ, curr->qnode);
           StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
           DeleteEventNode(eventQ);
           break;
         }
         else if(curr->event_type == 5) {
+          HourPassedPrint(curr, priorityQ, evalQ);
+          current_time = curr->event_time;
           ProcessPatientDeparture(eventQ, priorityQ, curr->qnode, cleanMu);
           DeleteEventNode(eventQ);
           break;
         }
         else if(curr->event_type == 6) {
+          HourPassedPrint(curr, priorityQ, evalQ);
+          current_time = curr->event_time;
           JanitorCleanedRoom(eventQ, priorityQ, curr);
           StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
           DeleteEventNode(eventQ);
@@ -148,15 +162,21 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
       }
     }
     else if((eventQ->head)->event_type == 3) {
+      HourPassedPrint(eventQ->head, priorityQ, evalQ);
+      current_time = eventQ->head->event_time;
       ProcessPriorityArrival(eventQ, evalQ, priorityQ, (eventQ->head)->qnode);
       DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
     else if((eventQ->head)->event_type == 5) {
+      HourPassedPrint(eventQ->head, priorityQ, evalQ);
+      current_time = eventQ->head->event_time;
       ProcessPatientDeparture(eventQ, priorityQ, (eventQ->head)->qnode, cleanMu);
       DeleteEventNode(eventQ);
     }
     else if((eventQ->head)->event_type == 6) {
+      HourPassedPrint(eventQ->head, priorityQ, evalQ);
+      current_time = eventQ->head->event_time;
       JanitorCleanedRoom(eventQ, priorityQ, (eventQ->head));
       DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);

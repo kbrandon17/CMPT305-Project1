@@ -153,7 +153,6 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
 // Called after patient has been helped by nurse and begins waiting in priority queue
 
 void ProcessPriorityArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival){
-  current_time = eventQ->head->event_time;
   if((eventQ->head)->event_type == 2) {
     StartEvaluationService(eventQ, evalQ, (eventQ->head)->qnode);
   }
@@ -248,7 +247,7 @@ void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, struc
   elementQ->janitors++;
   avgCleanUpTime += current_time - event->qnode->priority_departure_time;
   numCleanedRooms++;
-  free(event->qnode);
+//  free(event->qnode);
   if (elementQ->janitorQueueHead != NULL) {
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ));
     InsertIntoEventQueueInOrder(eventQ, clean_event);
