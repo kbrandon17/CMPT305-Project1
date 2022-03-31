@@ -167,7 +167,6 @@ if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - nu
 else {
   numberOfTurnedAwayPatients++;
 
-    srand(seed);
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
 
   if(arrival->qnode->priority == 3) {
