@@ -105,9 +105,10 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
 
 // Function to process the arrival of a patient to the hospital.
 
-void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity){
-
-if(totalNumberInSystemNow < maxCapacity) {
+void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity, int available_rooms){
+//max = total capacity - numberof rooms
+//total people = total in system - (numberofrooms - rooms available - (total departures - cleaned rooms))
+if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - numCleanedRooms))) < maxCapacity - numRooms) {
   AddAvgInSystem(prevCurrentTime);
   prevCurrentTime = current_time;
   current_time = arrival->eval_arrival_time;
@@ -202,6 +203,8 @@ void StartEvaluationService(struct EventQueue* eventQ, struct EvalQueue* evalQ, 
   DeleteServiceNode(eventQ);
   evalQ->availableNurses--;
   servNode->eval_waiting_time = current_time-(servNode->eval_arrival_time);
+  avgEvalWaitingTime += servNode->eval_waiting_time;
+  numEval++;
   evalQ->cumulative_waiting += servNode->eval_waiting_time;
   struct EventQueueNode* new = CreatePriorityArrivalEventNode(servNode);
 

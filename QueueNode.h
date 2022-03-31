@@ -7,7 +7,8 @@ struct QueueNode {
     double priority_arrival_time; // customer priority arrival time
     double priority_service_time; // customer priority service time
     double priority_waiting_time; // customer priority waiting time
-    double time_to_clean_room;    // time it takes the janitor to clean their room
+    double priority_departure_time; //time customer departs/room ready for cleaning
+    double time_to_clean_room;  // time it takes the janitor to clean their room
     int priority;                 // 1 - low, 2 - med, 3 - high
     struct QueueNode *next;       // next element in line; NULL if this is the last element
 };

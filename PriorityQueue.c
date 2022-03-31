@@ -151,21 +151,42 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
 // Called after patient has been helped by nurse and begins waiting in priority queue
 
 void ProcessPriorityArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* elementQ, struct QueueNode* arrival){
+  current_time = eventQ->head->event_time;
   if((eventQ->head)->event_type == 2) {
     StartEvaluationService(eventQ, evalQ, (eventQ->head)->qnode);
   }
-  arrival->priority_arrival_time = arrival->eval_arrival_time + arrival->eval_waiting_time + arrival->eval_service_time;
+  arrival->priority_arrival_time = current_time;
   evalQ->availableNurses++;
   InsertPriorityQueue(elementQ, arrival);
 }
+
+// Function to set the priority queue wait times
+void SetPriorityWait(struct QueueNode* patient){
+  double waittime = current_time - patient->priority_arrival_time;
+  avgPriorityWaitingTimeAll += waittime;
+  numSeen++;
+  switch(patient->priority){
+    case 1:
+      avgPriorityWaitingTimeLow += waittime;
+      numSeenLow++;
+    case 2:
+      avgPriorityWaitingTimeMed += waittime;
+      numSeenMed++;
+    case 3:
+      avgPriorityWaitingTimeHigh += waittime;
+      numSeenHigh++;
+  }
+
+}
+
 
 // Function to put patient from priority queue into a room
 
 void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double highPriMu, double medPriMu, double lowPriMu)
 {
-
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
+    SetPriorityWait(patient);
     if (patient == NULL) {return;}
     double service_time;
     switch(patient->priority){
@@ -190,6 +211,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 
 void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, struct QueueNode* room, double cleanMu){
    current_time = room->priority_arrival_time + room->priority_service_time;
+   room->priority_departure_time = current_time;
    room->time_to_clean_room = ((-1/cleanMu) * log(1-((double) (rand()+1) / RAND_MAX)));
   if(elementQ->janitors > 0){
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(room);
@@ -201,14 +223,30 @@ void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, 
   AddAvgInSystem(prevCurrentTime);
   prevCurrentTime = current_time;
   totalNumberInSystemNow--;
+  avgResponseTimeAll += current_time - room->eval_arrival_time;
+  switch(room->priority){
+    case 1: 
+      avgResponseTimeLow += current_time - room->eval_arrival_time;
+      departure_count_low++;
+    case 2:
+      avgResponseTimeMed += current_time - room->eval_arrival_time;
+      departure_count_med++;
+    case 3:
+      avgResponseTimeHigh += current_time - room->eval_arrival_time;
+      departure_count_high++;
+}
   departure_count++;
 }
 
 // Called when a janitor has finished cleaning a room
 
-void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ) {
+void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, struct EventQueueNode* event) {
+  current_time = event->event_time;
   elementQ->available_rooms++;
   elementQ->janitors++;
+  avgCleanUpTime += current_time - event->qnode->priority_departure_time;
+  numCleanedRooms++;
+
   if (elementQ->janitorQueueHead != NULL) {
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ));
     InsertIntoEventQueueInOrder(eventQ, clean_event);

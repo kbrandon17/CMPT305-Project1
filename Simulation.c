@@ -31,21 +31,32 @@
 
     double current_time = 0.0;          // current time during simulation (minutes past 12AM)
     double prevCurrentTime = 0.0;       // to store previous current time to calculate averages
-    int hoursPassed;                    // stores number of hours passed to know whether to print stats
+    int hoursPassed = 1;                    // stores number of hours passed to know whether to print stats
     int departure_count;                // total departures of patients leaving hospital
+    int departure_count_low = 0;                // total departures of low priority patients leaving hospital
+    int departure_count_med = 0;                // total departures of medium priority patients leaving hospital
+    int departure_count_high = 0;                // total departures of high priority patients leaving hospital
     double avgInSystem = 0;                 // average number of patients in system
     double avgResponseTimeAll;          // average response time of all patients
     double avgResponseTimeHigh;         // average response time of high priority patients
     double avgResponseTimeMed;          // average response time of medium priority patients
     double avgResponseTimeLow;          // average response time of low priority patients
     double avgEvalWaitingTime;          // average waiting time in evaluation queue
+    int numEval = 0;                        //number of evaluated patients
+    int numSeen = 0;                        //number of patients past priority queue (seen/being seen)
+    int numSeenLow = 0;                     //number of low priority patients past priority queue (seen/being seen)
+    int numSeenMed = 0;                     //number of med priority patients past priority queue (seen/being seen)
+    int numSeenHigh = 0;                    //number of high priority patients past priority queue (seen/being seen)
     double avgPriorityWaitingTimeAll;   // average waiting time in priority queue of all patients
     double avgPriorityWaitingTimeHigh;  // average waiting time in priority queue of high priority patients
     double avgPriorityWaitingTimeMed;   // average waiting time in priority queue of medium priority patients
     double avgPriorityWaitingTimeLow;   // average waiting time in priority queue of low priority patients
     double avgCleanUpTime;              // average time to clean up the patient room
+    int numAvailableRooms;
+    int numCleanedRooms;                  // number of rooms that have been cleaned
     int numberOfTurnedAwayPatients;     // total number of turned away patients due to full capacity
     int totalNumberInSystemNow;         // tracks total number of patients in hospital at given moment
+    int numRooms;
 
 // Printing out the report of statistics at every hour
 
@@ -59,16 +70,16 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
 
   printf("Total departures: %d\n", departure_count);
   printf("Average in system: %.2f\n", ((avgInSystem) + (totalNumberInSystemNow * ((hoursPassed*60)-prevCurrentTime)))/(hoursPassed*60));
-  printf("Average response time for all patients: %.2f\n", avgResponseTimeAll);
-  printf("Average response time for high priority patients: %.2f\n", avgResponseTimeHigh);
-  printf("Average response time for medium priority patients: %.2f\n", avgResponseTimeMed);
-  printf("Average response time for low priority patients: %.2f\n", avgResponseTimeLow);
-  printf("Average Evaluation Waiting Time: %.2f\n", avgEvalWaitingTime);
-  printf("Average waiting time for all priority patients: %.2f\n", avgPriorityWaitingTimeAll);
-  printf("Average waiting time for high priority patients: %.2f\n", avgPriorityWaitingTimeHigh);
-  printf("Average waiting time for medium priority patients: %.2f\n", avgPriorityWaitingTimeMed);
-  printf("Average waiting time for low priority patients: %.2f\n", avgPriorityWaitingTimeLow);
-  printf("Average cleaning time for patient rooms: %.2f\n", avgCleanUpTime);
+  printf("Average response time for all patients: %.2f\n", avgResponseTimeAll/departure_count);
+  printf("Average response time for high priority patients: %.2f\n", avgResponseTimeHigh/departure_count_high);
+  printf("Average response time for medium priority patients: %.2f\n", avgResponseTimeMed/departure_count_med);
+  printf("Average response time for low priority patients: %.2f\n", avgResponseTimeLow/departure_count_low);
+  printf("Average Evaluation Waiting Time: %.2f\n", avgEvalWaitingTime/numEval);
+  printf("Average waiting time for all priority patients: %.2f\n", avgPriorityWaitingTimeAll/numSeen);
+  printf("Average waiting time for high priority patients: %.2f\n", avgPriorityWaitingTimeHigh/numSeenHigh);
+  printf("Average waiting time for medium priority patients: %.2f\n", avgPriorityWaitingTimeMed/numSeenMed);
+  printf("Average waiting time for low priority patients: %.2f\n", avgPriorityWaitingTimeLow/numSeenLow);
+  printf("Average cleaning time for patient rooms: %.2f\n", avgCleanUpTime/numCleanedRooms);
   printf("Number of turned away patients due to max capacity: %d\n", numberOfTurnedAwayPatients);
 
 }
@@ -84,21 +95,24 @@ void AddAvgInSystem(double lastTime){
 // Determines what the next event is based on current_time
 // Print statistics if current time has passed a full hour
 
-void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms, int maxCapacity)
+void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms2, int maxCapacity)
 {
+  numRooms = numRooms2;
   while(current_time < 1440) {
-      while(eventQ->head->event_time > hoursPassed * 60) {
+      while(eventQ->head->event_time > hoursPassed * 60 && hoursPassed*60 <=1440) {
       hoursPassed++;
       PrintStatistics(priorityQ, evalQ, hoursPassed);
     }
+    current_time = eventQ->head->event_time;
     if((eventQ->head)->event_type == 1) {
-      ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity);
+      ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
     }
     else if(((eventQ->head)->event_type == 2) || (eventQ->head)->event_type == 4) {
       struct EventQueueNode* curr = eventQ->head;
       while(curr != NULL) {
+        current_time = curr->event_time;
         if(curr->event_type == 1) {
-          ProcessEvalArrival(eventQ, evalQ, curr->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity);
+          ProcessEvalArrival(eventQ, evalQ, curr->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
           break;
         }
         else if(curr->event_type == 3) {
@@ -113,7 +127,7 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
           break;
         }
         else if(curr->event_type == 6) {
-          JanitorCleanedRoom(eventQ, priorityQ);
+          JanitorCleanedRoom(eventQ, priorityQ, curr);
           StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
           DeleteEventNode(eventQ);
           break;
@@ -131,7 +145,7 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
       DeleteEventNode(eventQ);
     }
     else if((eventQ->head)->event_type == 6) {
-      JanitorCleanedRoom(eventQ, priorityQ);
+      JanitorCleanedRoom(eventQ, priorityQ, (eventQ->head));
       DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
