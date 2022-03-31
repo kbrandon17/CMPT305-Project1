@@ -120,7 +120,7 @@ struct QueueNode* PopPriorityQueue(struct Queue* queue){
     queue->highTail = NULL;
     queue->mediumTail = NULL;
     queue->head = NULL;
-    return NULL;
+    return pop;
   } else if (pop == queue->mediumTail) { //if pop is last node of medium section
     queue->mediumTail = NULL;
   } else if(pop == queue->highTail) { //if pop is last node of high section
