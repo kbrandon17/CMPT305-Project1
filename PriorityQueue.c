@@ -74,6 +74,7 @@ void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){
         queue->tail->next = queuenode;
         queue->tail = queuenode;
       }
+      break;
     case 2: //if medium priority
       if(queue->head == NULL){ //if queue empty
         queue->head = queuenode;
@@ -93,6 +94,7 @@ void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){
         queue->mediumTail->next = queuenode;
         queue->mediumTail = queuenode;
       }
+      break;
 
 
     case 3: //if high priority
@@ -109,6 +111,7 @@ void InsertPriorityQueue(struct Queue* queue, struct QueueNode* queuenode){
         queue->highTail->next = queuenode;
         queue->highTail = queuenode;
       }
+      break;
   }
 
 }

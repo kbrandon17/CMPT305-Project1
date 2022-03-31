@@ -147,7 +147,7 @@ struct EventQueueNode* CreatePriorityStartServiceEventNode(struct QueueNode* q) 
 struct EventQueueNode* CreateExitHospitalEventNode(struct QueueNode* q) {
 
   struct EventQueueNode* newNode = malloc(sizeof(struct EventQueueNode));
-  newNode->event_time = q->priority_arrival_time + q->priority_service_time + q->priority_waiting_time;
+  newNode->event_time = current_time +q->priority_service_time;
   newNode->event_type = 5;
   newNode->qnode = q;
   newNode->next = NULL;
