@@ -193,12 +193,13 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
     switch(patient->priority){
       case 1:
          service_time = ((-1/lowPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
-      
+         break;
       case 2:
         service_time = ((-1/medPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
-
+        break;
       case 3:
         service_time = ((-1/highPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
+        break;
     }
     patient->priority_service_time = service_time;
     struct EventQueueNode* event = CreateExitHospitalEventNode(patient);
@@ -229,12 +230,15 @@ void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, 
     case 1: 
       avgResponseTimeLow += current_time - room->eval_arrival_time;
       departure_count_low++;
+      break;
     case 2:
       avgResponseTimeMed += current_time - room->eval_arrival_time;
       departure_count_med++;
+      break;
     case 3:
       avgResponseTimeHigh += current_time - room->eval_arrival_time;
       departure_count_high++;
+      break;
 }
   departure_count++;
 }
