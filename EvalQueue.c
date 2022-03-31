@@ -101,7 +101,7 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
   }
 
 
-
+    newQueue->waiting_count = 0;
     newQueue->availableNurses = numNurses;
     newQueue->cumulative_waiting = 0.0;
     newQueue->totalInSystem = 0;

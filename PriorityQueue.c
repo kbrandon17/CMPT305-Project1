@@ -145,6 +145,8 @@ struct Queue* CreatePriorityQueue(int available, int janitors){
   queue->totalInSystem=0;
   queue->available_rooms = available;
   queue->janitors = janitors;
+  queue->janitorQueueHead = NULL;
+  queue->janitorQueueTail = NULL;
   return queue;
 }
 
@@ -247,7 +249,6 @@ void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, struc
   avgCleanUpTime += current_time - event->qnode->priority_departure_time;
   numCleanedRooms++;
   free(event->qnode);
-
   if (elementQ->janitorQueueHead != NULL) {
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ));
     InsertIntoEventQueueInOrder(eventQ, clean_event);
