@@ -49,12 +49,12 @@
 
 // Printing out the report of statistics at every hour
 
-void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
+void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursPassed){
 
    if(current_time >= 1440) {
      printf("\nEnd of Simulation - at 12AM the next day:\n");
    }
-   else printf("\nAt %f O'Clock:\n", floor(current_time/60));
+   else printf("\nAt %d O'Clock:\n", hoursPassed);
 
 
   printf("Total departures: %d\n", departure_count);
@@ -81,6 +81,7 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ){
 void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms, int maxCapacity)
 {
   while(current_time < 1440) {
+
     if((eventQ->head)->event_type == 1) {
       ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity);
     }
@@ -125,10 +126,10 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
       DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
     }
-    if(floor(current_time/60) > hoursPassed) {
+    while(eventQ->head->event_time > hoursPassed * 60) {
       hoursPassed++;
-      PrintStatistics(priorityQ, evalQ);
+      PrintStatistics(priorityQ, evalQ, hoursPassed);
     }
   }
-  PrintStatistics(priorityQ, evalQ);
+  //PrintStatistics(priorityQ, evalQ);
 }
