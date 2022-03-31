@@ -170,6 +170,7 @@ void FreeEventQueue(struct EventQueue* elementQ) {
   while (elementQ->head != NULL) {
     curr = elementQ->head;
     elementQ->head = (elementQ->head)->next;
+    free(curr->qnode);
     free(curr);
   }
   free(elementQ);

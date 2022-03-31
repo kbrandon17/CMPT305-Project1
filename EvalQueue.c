@@ -219,8 +219,5 @@ if(evalQ->waiting_count > 0) {
 // Free evaluation queue 
 
 void FreeEvalQueue(struct EvalQueue* elementQ) {
-  free(elementQ->nextHighPri);
-  free(elementQ->nextLowPri);
-  free(elementQ->nextMedPri);
   free(elementQ);
 }
