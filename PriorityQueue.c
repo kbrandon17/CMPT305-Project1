@@ -219,6 +219,7 @@ void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, 
    room->priority_departure_time = current_time;
    room->time_to_clean_room = ((-1/cleanMu) * log(1-((double) (rand()+1) / RAND_MAX)));
   if(elementQ->janitors > 0){
+    elementQ->janitors--;
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(room);
     InsertIntoEventQueueInOrder(eventQ, clean_event);
   } else {
@@ -256,6 +257,7 @@ void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, struc
   numCleanedRooms++;
 //  free(event->qnode);
   if (elementQ->janitorQueueHead != NULL) {
+    elementQ->janitors--;
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ));
     InsertIntoEventQueueInOrder(eventQ, clean_event);
   }
