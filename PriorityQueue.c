@@ -192,7 +192,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
     struct QueueNode* patient = PopPriorityQueue(elementQ);
     if (patient == NULL) {return;}
     SetPriorityWait(patient);
-    double service_time;
+    /*double service_time;
     switch(patient->priority){
       case 1:
          service_time = ((-1/lowPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -204,7 +204,7 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
         service_time = ((-1/highPriMu) * log(1-((double) (rand()+1) / RAND_MAX)));
         break;
     }
-    patient->priority_service_time = service_time;
+    patient->priority_service_time = service_time;*/
     struct EventQueueNode* event = CreateExitHospitalEventNode(patient);
     InsertIntoEventQueueInOrder(eventQ, event);
    elementQ->available_rooms--;
