@@ -186,8 +186,8 @@ void StartRoomService(struct EventQueue* eventQ, struct Queue* elementQ, double 
 {
   if(elementQ->available_rooms > 0){
     struct QueueNode* patient = PopPriorityQueue(elementQ);
-    SetPriorityWait(patient);
     if (patient == NULL) {return;}
+    SetPriorityWait(patient);
     double service_time;
     switch(patient->priority){
       case 1:

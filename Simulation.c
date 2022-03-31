@@ -100,8 +100,8 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
   numRooms = numRooms2;
   while(current_time < 1440) {
       while(eventQ->head->event_time > hoursPassed * 60 && hoursPassed*60 <=1440) {
-      hoursPassed++;
       PrintStatistics(priorityQ, evalQ, hoursPassed);
+      hoursPassed++;
     }
     current_time = eventQ->head->event_time;
     if((eventQ->head)->event_type == 1) {
