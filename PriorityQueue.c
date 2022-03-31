@@ -170,12 +170,15 @@ void SetPriorityWait(struct QueueNode* patient){
     case 1:
       avgPriorityWaitingTimeLow += waittime;
       numSeenLow++;
+      break;
     case 2:
       avgPriorityWaitingTimeMed += waittime;
       numSeenMed++;
+      break;
     case 3:
       avgPriorityWaitingTimeHigh += waittime;
       numSeenHigh++;
+      break;
   }
 
 }
