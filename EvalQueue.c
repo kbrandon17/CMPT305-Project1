@@ -108,6 +108,7 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
 void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity){
 
 if(totalNumberInSystemNow < maxCapacity) {
+  AddAvgInSystem(prevCurrentTime);
   prevCurrentTime = current_time;
   current_time = arrival->eval_arrival_time;
 

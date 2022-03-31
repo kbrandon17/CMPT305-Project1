@@ -11,6 +11,7 @@
 #define PRIORITYQUEUE
 #endif
 
+void AddAvgInSystem(double lastTime);
 void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms, int maxCapacity);
 
 

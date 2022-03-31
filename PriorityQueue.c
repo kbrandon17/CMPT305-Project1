@@ -198,8 +198,10 @@ void ProcessPatientDeparture(struct EventQueue* eventQ, struct Queue* elementQ, 
     room->next = NULL;
     InsertJanitorQueue(elementQ, room);
   }
-
-  elementQ->totalInSystem--;
+  AddAvgInSystem(prevCurrentTime);
+  prevCurrentTime = current_time;
+  totalNumberInSystemNow--;
+  departure_count++;
 }
 
 // Called when a janitor has finished cleaning a room

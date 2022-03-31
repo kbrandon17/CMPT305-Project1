@@ -33,7 +33,7 @@
     double prevCurrentTime = 0.0;       // to store previous current time to calculate averages
     int hoursPassed;                    // stores number of hours passed to know whether to print stats
     int departure_count;                // total departures of patients leaving hospital
-    double avgInSystem;                 // average number of patients in system
+    double avgInSystem = 0;                 // average number of patients in system
     double avgResponseTimeAll;          // average response time of all patients
     double avgResponseTimeHigh;         // average response time of high priority patients
     double avgResponseTimeMed;          // average response time of medium priority patients
@@ -58,7 +58,7 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
 
 
   printf("Total departures: %d\n", departure_count);
-  printf("Average in system: %.2f\n", avgInSystem);
+  printf("Average in system: %.2f\n", ((avgInSystem) + (totalNumberInSystemNow * ((hoursPassed*60)-prevCurrentTime)))/(hoursPassed*60));
   printf("Average response time for all patients: %.2f\n", avgResponseTimeAll);
   printf("Average response time for high priority patients: %.2f\n", avgResponseTimeHigh);
   printf("Average response time for medium priority patients: %.2f\n", avgResponseTimeMed);
@@ -73,6 +73,12 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
 
 }
 
+//Adds the number of people in system * time they were there
+
+void AddAvgInSystem(double lastTime){
+  avgInSystem += totalNumberInSystemNow * (current_time - lastTime);
+}
+
 // This is the main simulator function
 // Runs until 24 hours (1440 minutes)
 // Determines what the next event is based on current_time
@@ -81,7 +87,10 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
 void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* evalQ, struct Queue* priorityQ, int numNurses, double highPriLambda, double highPriMu, double medPriLambda, double medPriMu, double lowPriLambda, double lowPriMu, double evalMu, double cleanMu, int numJanitors, int numRooms, int maxCapacity)
 {
   while(current_time < 1440) {
-
+      while(eventQ->head->event_time > hoursPassed * 60) {
+      hoursPassed++;
+      PrintStatistics(priorityQ, evalQ, hoursPassed);
+    }
     if((eventQ->head)->event_type == 1) {
       ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity);
     }
@@ -125,10 +134,6 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
       JanitorCleanedRoom(eventQ, priorityQ);
       DeleteEventNode(eventQ);
       StartRoomService(eventQ, priorityQ, highPriMu, medPriMu, lowPriMu);
-    }
-    while(eventQ->head->event_time > hoursPassed * 60) {
-      hoursPassed++;
-      PrintStatistics(priorityQ, evalQ, hoursPassed);
     }
   }
   //PrintStatistics(priorityQ, evalQ);
