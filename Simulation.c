@@ -58,6 +58,9 @@
     int totalNumberInSystemNow;         // tracks total number of patients in hospital at given moment
     int numRooms;
 
+//
+
+
 // Printing out the report of statistics at every hour
 
 void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursPassed){
@@ -67,9 +70,10 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
    }
    else printf("\nAt %d O'Clock:\n", hoursPassed);
 
-
   printf("Total departures: %d\n", departure_count);
   printf("Average in system: %.2f\n", ((avgInSystem) + (totalNumberInSystemNow * ((hoursPassed*60)-prevCurrentTime)))/(hoursPassed*60));
+  if(departure_count > 0){ printf("Average response time for all patients: %.2f\n", avgResponseTimeAll/departure_count); }
+  else { printf("Average response time for all patients: N/A\n");}
   printf("Average response time for all patients: %.2f\n", avgResponseTimeAll/departure_count);
   printf("Average response time for high priority patients: %.2f\n", avgResponseTimeHigh/departure_count_high);
   printf("Average response time for medium priority patients: %.2f\n", avgResponseTimeMed/departure_count_med);
