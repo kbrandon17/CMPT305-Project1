@@ -90,7 +90,7 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
   else { printf("Average waiting time for medium priority patients: N/A\n");}
   if(numSeenLow > 0){ printf("Average waiting time for low priority patients: %.2f\n", avgPriorityWaitingTimeLow/numSeenLow); }
   else { printf("Average waiting time for low priority patients: N/A\n");}
-  if(numSeenLow > 0){ printf("Average cleaning time for patient rooms: %.2f\n", avgCleanUpTime/numCleanedRooms); }
+  if(numCleanedRooms > 0){ printf("Average cleaning time for patient rooms: %.2f\n", avgCleanUpTime/numCleanedRooms); }
   else { printf("Average cleaning time for patient rooms: N/A\n");}
   printf("Number of turned away patients due to max capacity: %d\n", numberOfTurnedAwayPatients);
 
