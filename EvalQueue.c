@@ -63,16 +63,19 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
       InsertIntoEventQueueInOrder(eventQ, med);
     }
     else {
+      free(med->qnode);
       free(med);
     }
     if(lowprilambda > 0) {
       InsertIntoEventQueueInOrder(eventQ, low);
     }
     else {
+      free(low->qnode);
       free(low);
     }
   }
   else if(medPriArr > 0) {
+    free(high->qnode);
     free(high);
     eventQ->head = med;
     eventQ->tail = med;
@@ -80,11 +83,14 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
     InsertIntoEventQueueInOrder(eventQ, low);
     }
     else {
+      free(low->qnode);
       free(low);
     }
   }
   else if(lowPriArr > 0) {
+    free(high->qnode);
     free(high);
+    free(med->qnode);
     free(med);
     eventQ->head = low;
     eventQ->tail = low;
