@@ -65,8 +65,8 @@
 
 void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursPassed){
 
-   if(current_time >= 1440) {
-     printf("\nEnd of Simulation - at 12AM the next day:\n");
+   if(hoursPassed == 24) {
+     printf("\nEnd of Simulation - at 24H:\n");
    }
    else printf("\nAt %d O'Clock:\n", hoursPassed);
 
@@ -82,14 +82,15 @@ void PrintStatistics(struct Queue* elementQ, struct EvalQueue* evalQ, int hoursP
   else { printf("Average response time for low priority patients: N/A\n");}
   if(numEval > 0){ printf("Average Evaluation Waiting Time: %.2f\n", avgEvalWaitingTime/numEval); }
   else { printf("Average Evaluation Waiting Time: N/A\n");}
-  if(numSeen > 0){ printf("Average waiting time for all priority patients: %.2f\n", avgPriorityWaitingTimeAll/numSeen); }
-  else { printf("Average waiting time for all priority patients: N/A\n");}
-  if(numSeenHigh > 0){  printf("Average waiting time for high priority patients: %.2f\n", avgPriorityWaitingTimeHigh/numSeenHigh); }
-  else {   printf("Average waiting time for high priority patients: N/A\n");}
-  if(numSeenMed > 0){ printf("Average waiting time for medium priority patients: %.2f\n", avgPriorityWaitingTimeMed/numSeenMed); }
-  else { printf("Average waiting time for medium priority patients: N/A\n");}
-  if(numSeenLow > 0){ printf("Average waiting time for low priority patients: %.2f\n", avgPriorityWaitingTimeLow/numSeenLow); }
-  else { printf("Average waiting time for low priority patients: N/A\n");}
+  printf("(Priority Queue waiting time calculated for all patients being/have been seen, not necessarily departed)\n");
+  if(numSeen > 0){ printf("Average priority queue waiting time for all patients: %.2f\n", avgPriorityWaitingTimeAll/numSeen); }
+  else { printf("Average priority queue waiting time for all patients: N/A\n");}
+  if(numSeenHigh > 0){  printf("Average priority queue waiting time for high priority patients: %.2f\n", avgPriorityWaitingTimeHigh/numSeenHigh); }
+  else {   printf("Average priority queue waiting time for high priority patients: N/A\n");}
+  if(numSeenMed > 0){ printf("Average priority queue waiting time for medium priority patients: %.2f\n", avgPriorityWaitingTimeMed/numSeenMed); }
+  else { printf("Average priority queue waiting time for medium priority patients: N/A\n");}
+  if(numSeenLow > 0){ printf("Average priority queue waiting time for low priority patients: %.2f\n", avgPriorityWaitingTimeLow/numSeenLow); }
+  else { printf("Average priority queue waiting time for low priority patients: N/A\n");}
   if(numCleanedRooms > 0){ printf("Average cleaning time for patient rooms: %.2f\n", avgCleanUpTime/numCleanedRooms); }
   else { printf("Average cleaning time for patient rooms: N/A\n");}
   printf("Number of turned away patients due to max capacity: %d\n", numberOfTurnedAwayPatients);
