@@ -110,17 +110,17 @@ struct EvalQueue* newQueue = malloc(sizeof(struct EvalQueue));
 
 // Function to process the arrival of a patient to the hospital.
 
-void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct QueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity, int available_rooms){
+void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, struct EventQueueNode* arrival, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu, int maxCapacity, int available_rooms){
 //max = total capacity - numberof rooms
 //total people = total in system - (numberofrooms - rooms available - (total departures - cleaned rooms))
 if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - numCleanedRooms))) < maxCapacity - numRooms) {
   AddAvgInSystem(prevCurrentTime);
   prevCurrentTime = current_time;
-  current_time = arrival->eval_arrival_time;
+  current_time = arrival->qnode->eval_arrival_time;
 
       double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
 
-  if(arrival->priority == 3) {
+  if(arrival->qnode->priority == 3) {
 
       double highPriArr = current_time + ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -130,7 +130,7 @@ if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - nu
       (new->qnode)->priority = 3;
   }
 
-  else if(arrival->priority == 2) {
+  else if(arrival->qnode->priority == 2) {
 
       double medPriArr = current_time + ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -140,7 +140,7 @@ if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - nu
         InsertIntoEventQueueInOrder(eventQ, new);
   }
 
-  else if(arrival->priority == 1) {
+  else if(arrival->qnode->priority == 1) {
 
       double lowPriArr = current_time + ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
@@ -154,12 +154,12 @@ if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - nu
   evalQ->totalInSystem++;
 
   if(evalQ->availableNurses > 0) {
-    StartEvaluationService(eventQ, evalQ, arrival);
+    StartEvaluationService(eventQ, evalQ, arrival->qnode);
     DeleteEventNode(eventQ);
   }
   else {
     evalQ->waiting_count++;
-    struct EventQueueNode* new = CreateEvalServiceEventNode(arrival);
+    struct EventQueueNode* new = CreateEvalServiceEventNode(arrival->qnode);
     InsertIntoEventQueueInOrder(eventQ, new);
     DeleteEventNode(eventQ);
   }
@@ -170,8 +170,8 @@ else {
     srand(seed);
     double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
 
-  if(arrival->priority == 3) {
-
+  if(arrival->qnode->priority == 3) {
+      DeleteEventNode(eventQ);
       double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
       evalQ->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
@@ -179,8 +179,8 @@ else {
       InsertIntoEventQueueInOrder(eventQ, new);
   }
 
-  else if(arrival->priority == 2) {
-
+  else if(arrival->qnode->priority == 2) {
+      DeleteEventNode(eventQ);
       double medPriArr = ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
       evalQ->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
@@ -188,8 +188,8 @@ else {
       InsertIntoEventQueueInOrder(eventQ, new);
   }
 
-  else if(arrival->priority == 1) {
-
+  else if(arrival->qnode->priority == 1) {
+      DeleteEventNode(eventQ);
       double lowPriArr = ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
       evalQ->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);

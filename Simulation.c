@@ -124,7 +124,7 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
     if((eventQ->head)->event_type == 1) {
       HourPassedPrint(eventQ->head, priorityQ, evalQ);
       current_time = eventQ->head->event_time;
-      ProcessEvalArrival(eventQ, evalQ, (eventQ->head)->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
+      ProcessEvalArrival(eventQ, evalQ, eventQ->head, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
     }
     else if(((eventQ->head)->event_type == 2) || (eventQ->head)->event_type == 4) {
       struct EventQueueNode* curr = eventQ->head;
@@ -132,7 +132,7 @@ void Simulation(int random_seed, struct EventQueue* eventQ, struct EvalQueue* ev
         if(curr->event_type == 1) {
           HourPassedPrint(curr, priorityQ, evalQ);
           current_time = curr->event_time;
-          ProcessEvalArrival(eventQ, evalQ, curr->qnode, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
+          ProcessEvalArrival(eventQ, evalQ, curr, random_seed, highPriLambda, highPriMu, medPriLambda, medPriMu, lowPriLambda, lowPriMu, evalMu, maxCapacity, priorityQ->available_rooms);
           break;
         }
         else if(curr->event_type == 3) {
