@@ -132,7 +132,7 @@ struct EventQueueNode* CreateEvalServiceEventNode(struct QueueNode* q) {
 struct EventQueueNode* CreatePriorityArrivalEventNode(struct QueueNode* q) {
 
   struct EventQueueNode* newNode = malloc(sizeof(struct EventQueueNode));
-  newNode->event_time = current_time;
+  newNode->event_time = q->eval_arrival_time + q->eval_service_time + q->eval_waiting_time;
   newNode->event_type = 3;
   newNode->qnode = q;
   newNode->next = NULL;
