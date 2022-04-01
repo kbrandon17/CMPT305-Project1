@@ -170,28 +170,31 @@ else {
 
   if(arrival->qnode->priority == 3) {
       DeleteEventNode(eventQ);
-      double highPriArr = ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double highPriArr = current_time + ((-1/highprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double highPriSer = ((-1/highprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
       evalQ->nextHighPri = CreateNode(highPriArr, highPriSer, evalSer);
       struct EventQueueNode* new = CreateEvalArrivalEventNode(evalQ->nextHighPri);
+      new->qnode->priority = 3;
       InsertIntoEventQueueInOrder(eventQ, new);
   }
 
   else if(arrival->qnode->priority == 2) {
       DeleteEventNode(eventQ);
-      double medPriArr = ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double medPriArr = current_time + ((-1/medprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double medPriSer = ((-1/medprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
       evalQ->nextMedPri = CreateNode(medPriArr, medPriSer, evalSer);
       struct EventQueueNode* new = CreateEvalArrivalEventNode(evalQ->nextMedPri);
+      new->qnode->priority = 2;
       InsertIntoEventQueueInOrder(eventQ, new);
   }
 
   else if(arrival->qnode->priority == 1) {
       DeleteEventNode(eventQ);
-      double lowPriArr = ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
+      double lowPriArr = current_time + ((-1/lowprilambda) * log(1-((double) (rand()+1) / RAND_MAX)));
       double lowPriSer = ((-1/lowprimu) * log(1-((double) (rand()+1) / RAND_MAX)));
       evalQ->nextLowPri = CreateNode(lowPriArr, lowPriSer, evalSer);
       struct EventQueueNode* new = CreateEvalArrivalEventNode(evalQ->nextLowPri);
+      new->qnode->priority = 1;
       InsertIntoEventQueueInOrder(eventQ, new);
   }
 
