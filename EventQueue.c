@@ -29,6 +29,8 @@ struct EventQueue* InitializeEventQueue() {
   return newQueue;
 }
 
+// Inserts events into event queue in order of them occuring
+
 void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n) {
 if((q->head)->next != NULL) {
   struct EventQueueNode* curr = q->head->next;
@@ -70,6 +72,8 @@ if((q->head)->next != NULL) {
   }
 
 }
+
+//Deleting 2 event if it is at the front of event queue
 
 void DeleteServiceNode (struct EventQueue *q) {
   if((q->head)->event_type == 2) {
