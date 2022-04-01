@@ -34,7 +34,11 @@ if((q->head)->next != NULL) {
   struct EventQueueNode* curr = q->head->next;
   struct EventQueueNode* prev = q->head;
   while (curr != NULL) {
-    if(n->event_time >= prev->event_time && n->event_time <= curr->event_time) {
+    if(n->event_time < prev->event_time) {
+      q->head = n;
+      n->next = prev;
+    }
+    else if(n->event_time >= prev->event_time && n->event_time <= curr->event_time) {
         prev->next = n;
         n->next = curr;
         return;

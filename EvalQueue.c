@@ -116,7 +116,6 @@ void ProcessEvalArrival(struct EventQueue* eventQ, struct EvalQueue* evalQ, stru
 if((totalNumberInSystemNow - (numRooms - available_rooms - (departure_count - numCleanedRooms))) < maxCapacity - numRooms) {
   AddAvgInSystem(prevCurrentTime);
   prevCurrentTime = current_time;
-  current_time = arrival->qnode->eval_arrival_time;
 
       double evalSer = ((-1/evalmu) * log(1-((double) (rand()+1) / RAND_MAX)));
 
