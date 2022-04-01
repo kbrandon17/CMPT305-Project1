@@ -259,7 +259,7 @@ void JanitorCleanedRoom(struct EventQueue* eventQ, struct Queue* elementQ, struc
   elementQ->janitors++;
   avgCleanUpTime += current_time - event->qnode->priority_departure_time;
   numCleanedRooms++;
-//  free(event->qnode);
+  free(event->qnode);
   if (elementQ->janitorQueueHead != NULL) {
     elementQ->janitors--;
     struct EventQueueNode* clean_event = CreateJanitorCleanedRoomEventNode(PopJanitorQueue(elementQ));
