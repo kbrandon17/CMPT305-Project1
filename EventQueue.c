@@ -33,12 +33,13 @@ void InsertIntoEventQueueInOrder(struct EventQueue* q, struct EventQueueNode* n)
 if((q->head)->next != NULL) {
   struct EventQueueNode* curr = q->head->next;
   struct EventQueueNode* prev = q->head;
-  while (curr != NULL) {
-    if(n->event_time < prev->event_time) {
+  if(n->event_time < prev->event_time) {
+      n->next = q->head;
       q->head = n;
-      n->next = prev;
-    }
-    else if(n->event_time >= prev->event_time && n->event_time <= curr->event_time) {
+  }
+  else{
+  while (curr != NULL) {
+    if(n->event_time >= prev->event_time && n->event_time <= curr->event_time) {
         prev->next = n;
         n->next = curr;
         return;
@@ -51,7 +52,8 @@ if((q->head)->next != NULL) {
   q->tail = n;
   return;
 }
-else {
+}
+  else {
     struct EventQueueNode* curr = q->head;
     if(n->event_time >= curr->event_time) {
       curr->next = n;
@@ -66,6 +68,7 @@ else {
       return;
     }
   }
+
 }
 
 void DeleteServiceNode (struct EventQueue *q) {
