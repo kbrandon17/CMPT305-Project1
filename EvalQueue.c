@@ -28,9 +28,6 @@
 #define STDLIB
 #endif
 
-
-
-
 // Initializes the evaluation queue, setting the first arrival of each of the three priorities
 
 struct EvalQueue* InitializeEvalQueue(struct EventQueue* eventQ, int numNurses, int seed, double highprilambda, double highprimu, double medprilambda, double medprimu, double lowprilambda, double lowprimu, double evalmu){
